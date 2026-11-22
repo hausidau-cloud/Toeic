@@ -18,8 +18,8 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Tài khoản Admin mặc định để test nhanh nếu DB chưa bật
-    if (email === "admin@gmail.com" && password === "123") {
+    // Tài khoản Admin mặc định
+    if (email === "admin@gmail.com" && password === "31072005") {
       const token = jwt.sign(
         { id: 1, email: "admin@gmail.com", role: "Admin" },
         JWT_SECRET,
