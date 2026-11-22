@@ -1,0 +1,79 @@
+================================================================================
+HƯỚNG DẪN HỆ THỐNG TOEIC APP - TỪ VỰNG 600 TOEIC & NGỮ PHÁP 10 CHỦ ĐIỂM PART 5
+(HỖ TRỢ PHÂN QUYỀN ADMIN QUẢN TRỊ & HỌC VIÊN CHUYÊN TẬP TRUNG HỌC)
+================================================================================
+
+1) TÍNH NĂNG MỚI BỔ SUNG:
+--------------------------------------------------------------------------------
+A. PHÂN LOẠI & LỌC TỪ VỰNG THEO 20 CHỦ ĐỀ 600 TỪ VỰNG TOEIC (/vocabulary):
+   - Đã đọc toàn bộ 20 file PDF giáo trình 600 từ vựng TOEIC trong thư mục "tuvung".
+   - Tổng cộng 272 từ vựng & cụm từ được phân loại thành 21 chủ đề chuẩn chỉnh:
+       * Bài 1: Hợp đồng (Contracts)
+       * Bài 2: Tiếp thị (Marketing)
+       * Bài 3: Bảo hành (Warranties)
+       * Bài 4: Kế hoạch kinh doanh (Business Planning)
+       * Bài 5: Hội nghị (Conferences)
+       * Bài 6: Máy tính & CNTT (Computers)
+       * Bài 7: Công nghệ văn phòng (Office Technology)
+       * Bài 8: Quy trình văn phòng (Office Procedures)
+       * Bài 9: Thiết bị điện tử (Electronics)
+       * Bài 10: Thư từ thương mại (Correspondence)
+       * Bài 11: Quảng cáo tuyển dụng (Job Advertising & Recruiting)
+       * Bài 12: Ứng tuyển & Phỏng vấn (Applying & Interviewing)
+       * Bài 13: Tuyển dụng & Đào tạo (Hiring & Training)
+       * Bài 14: Lương bổng & Phúc lợi (Salaries & Benefits)
+       * Bài 15: Thăng chức & Khen thưởng (Promotions & Awards)
+       * Bài 16: Mua sắm (Shopping)
+       * Bài 17: Đặt hàng vật tư (Ordering Supplies)
+       * Bài 18: Giao hàng & Vận chuyển (Shipping)
+       * Bài 19: Hóa đơn & Thanh toán (Invoices)
+       * Bài 20: Kiểm kê kho hàng (Inventory)
+       * Cụm từ TOEIC ăn điểm cao (Collocations & Phrasal Verbs)
+   - Bảng nút bấm chọn nhanh chủ đề (Category Pills & Selector):
+       * 1 click chuyển toàn bộ Flashcard sang học từ của bài đó.
+       * Danh sách từ hiển thị đầy đủ phiên âm, nghĩa tiếng Việt, câu ví dụ và âm thanh phát âm.
+       * Chế độ Trắc nghiệm (Quiz): Tự động đổi bộ câu hỏi trắc nghiệm tương ứng đúng với bài học đang chọn!
+
+B. MÔ-ĐUN NGỮ PHÁP TOEIC THỰC CHIẾN (/grammar):
+   - Trích xuất toàn bộ từ tài liệu "0 GRAMMAR FOR TOEIC.pdf".
+   - Gồm 10 chủ điểm ngữ pháp cốt lõi chiếm tới 80% điểm số Part 5 & 6:
+       * Bài 1: Câu Từ Loại (Noun, Adj, Adv, Verb, cụm danh từ, linking verbs)
+       * Bài 2: Mệnh Đề Quan Hệ (Who, Whom, Whose, Which, That & rút gọn V-ing/V-ed)
+       * Bài 3: Tính Từ (V-ed chỉ cảm xúc vs V-ing chỉ bản chất, mẹo chọn tính từ gốc)
+       * Bài 4: Động Từ (To-V mục đích, Gerunds V-ing làm chủ ngữ & sau giới từ)
+       * Bài 5: So Sánh Hơn & So Sánh Nhất (Short/Long adj, than..., the most...)
+       * Bài 6: Trạng Từ & 13 Vị Trí Vàng trong đề thi TOEIC
+       * Bài 7: Câu Điều Kiện & Đảo Ngữ (Loại 1, 2, 3, đảo Should / Were / Had)
+       * Bài 8: Câu Bị Động (Các thì, modal verbs, nội động từ không chia bị động)
+       * Bài 9: Đại Từ (S, O, Tính từ sở hữu, Đại từ sở hữu, Phản thân by oneself)
+       * Bài 10: Liên Từ & Giới Từ (Because/Because of, Although/Despite, Both...and...)
+   - Chế độ học đa năng:
+       * Tab 1 - Lý thuyết, bảng tổng hợp và Mẹo làm bài Part 5 dưới 15 giây.
+       * Tab 2 - Luyện tập trắc nghiệm Part 5 với câu hỏi đề thi thực tế, tự động chấm điểm, hiển thị tỉ lệ đúng và giải thích ngữ pháp chi tiết.
+
+--------------------------------------------------------------------------------
+2) HỆ THỐNG PHÂN QUYỀN (RBAC):
+--------------------------------------------------------------------------------
+- VAI TRÒ ADMIN:
+    + Tài khoản: admin@gmail.com / Mật khẩu: 123
+    + Quyền hạn: Quản lý đề thi, quản lý từ vựng, quản lý người dùng, xem kết quả thi toàn hệ thống tại trang /admin.
+- VAI TRÒ HỌC VIÊN:
+    + Tài khoản: hocvien@gmail.com / Mật khẩu: 123456 (hoặc tài khoản tự đăng ký)
+    + Quyền hạn: Học từ vựng Flashcard theo từng bài, ôn 10 bài ngữ pháp, luyện đề thi bấm giờ, theo dõi tiến độ trên Dashboard cá nhân.
+    + Không thể truy cập trang /admin (bị chặn 403 Forbidden).
+
+--------------------------------------------------------------------------------
+3) CÁCH KHỞI ĐỘNG HỆ THỐNG:
+--------------------------------------------------------------------------------
+Bước 1: Bật XAMPP / MySQL và import file backend/database_toeic.sql (hệ thống có cơ chế tự động Fallback nếu chưa bật MySQL).
+Bước 2: Chạy Backend:
+    cd ToiecApp/backend
+    npm run dev
+    (Backend lắng nghe tại http://localhost:5000)
+Bước 3: Chạy Frontend React:
+    cd ToiecApp/React
+    npm run dev
+    (Frontend mở tại http://localhost:5173)
+
+Chúc bạn học tập và luyện thi TOEIC đạt điểm số cao nhất!
+================================================================================
