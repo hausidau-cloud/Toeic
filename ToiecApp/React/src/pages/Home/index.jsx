@@ -260,8 +260,11 @@ export default function Home() {
                   ))}
 
                   <div className="d-flex gap-2 mt-4 pt-2 border-top">
-                    <Link to="/dashboard" className="btn btn-primary flex-grow-1 py-2.5 rounded-pill fw-bold shadow-sm">
-                      {user?.role === "Admin" ? "Xem Dashboard Quản Trị" : "📊 Góc Học Tập Của Bạn"}
+                    <Link
+                      to={user ? "/dashboard" : "/login?redirect=/dashboard"}
+                      className="btn btn-primary flex-grow-1 py-2.5 rounded-pill fw-bold shadow-sm"
+                    >
+                      {user ? (user.role === "Admin" ? "Xem Dashboard Quản Trị" : "📊 Góc Học Tập Của Bạn") : "🔐 Đăng Nhập Để Lưu Tiến Độ"}
                     </Link>
                     <Link to="/vocabulary" className="btn btn-outline-warning py-2.5 px-3.5 rounded-pill fw-bold text-dark">
                       🧠 Học Từ Vựng

@@ -4,7 +4,16 @@ import { toeicApi } from "../services/api";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
+}
+
 export default function Practice() {
+  const user = getUser();
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -150,6 +159,28 @@ export default function Practice() {
             </div>
           </div>
 
+          {!user && (
+            <div className="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3 p-3 p-md-4">
+              <div className="d-flex align-items-center gap-3">
+                <span className="fs-2">🔐</span>
+                <div>
+                  <h6 className="fw-bold mb-1">Cần đăng nhập để làm bài thi</h6>
+                  <p className="text-muted small mb-0">
+                    Đăng nhập hoặc đăng ký tài khoản để hệ thống tự động bấm giờ, chấm điểm và lưu kết quả vào cơ sở dữ liệu.
+                  </p>
+                </div>
+              </div>
+              <div className="d-flex gap-2">
+                <Link to="/login?redirect=/practice" className="btn btn-primary btn-sm px-3 py-2 rounded-pill fw-bold text-nowrap">
+                  Đăng Nhập
+                </Link>
+                <Link to="/register?redirect=/practice" className="btn btn-outline-dark btn-sm px-3 py-2 rounded-pill fw-bold text-nowrap">
+                  Đăng Ký
+                </Link>
+              </div>
+            </div>
+          )}
+
           {loading && <div className="alert alert-info rounded-4 text-center">Đang tải danh sách 50 đề luyện thi TOEIC Reading...</div>}
           {error && <div className="alert alert-danger rounded-4">{error}</div>}
 
@@ -203,8 +234,11 @@ export default function Practice() {
                       ))}
                     </div>
 
-                    <Link to={`/practice/${test.id}`} className="btn btn-primary w-100 py-3 fw-bold">
-                      Bắt đầu làm bài ⏱
+                    <Link
+                      to={user ? `/practice/${test.id}` : `/login?redirect=/practice/${test.id}`}
+                      className="btn btn-primary w-100 py-2.5 fw-bold rounded-pill"
+                    >
+                      {user ? "Bắt đầu làm bài ⏱" : "Đăng nhập để làm bài 🔒"}
                     </Link>
                   </div>
                 </div>

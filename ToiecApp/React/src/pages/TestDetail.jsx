@@ -180,6 +180,52 @@ export default function TestDetail() {
     );
   }
 
+  // YÊU CẦU ĐĂNG NHẬP ĐỂ LÀM BÀI THI & LƯU CƠ SỞ DỮ LIỆU
+  if (!user) {
+    return (
+      <div className="d-flex flex-column min-vh-100">
+        <Navbar />
+        <div className="page-shell flex-grow-1 d-flex align-items-center py-5">
+          <div className="container">
+            <div className="row justify-content-center">
+              <div className="col-md-7 col-lg-5 text-center">
+                <div className="auth-card p-4 p-md-5 shadow-sm border rounded-4 bg-white">
+                  <div className="mb-3" style={{ fontSize: "3.5rem" }}>🔐</div>
+                  <h3 className="fw-bold mb-2">Yêu Cầu Đăng Nhập</h3>
+                  <p className="text-muted mb-4">
+                    Bạn cần đăng nhập hoặc tạo tài khoản để làm <b>{test?.title || "bài thi này"}</b>.
+                    Hệ thống sẽ <b>bấm giờ thực chiến</b>, <b>chấm điểm chi tiết</b> và <b>tự động lưu kết quả</b> vào hồ sơ của bạn trong cơ sở dữ liệu.
+                  </p>
+                  <div className="d-grid gap-2">
+                    <Link
+                      to={`/login?redirect=/practice/${id}`}
+                      className="btn btn-primary py-2.5 fw-bold rounded-pill"
+                    >
+                      Đăng Nhập Ngay
+                    </Link>
+                    <Link
+                      to={`/register?redirect=/practice/${id}`}
+                      className="btn btn-outline-primary py-2.5 fw-bold rounded-pill"
+                    >
+                      Đăng Ký Tài Khoản Mới
+                    </Link>
+                    <Link
+                      to="/practice"
+                      className="btn btn-link text-muted mt-2 text-decoration-none small"
+                    >
+                      ← Xem danh sách đề thi khác
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar />

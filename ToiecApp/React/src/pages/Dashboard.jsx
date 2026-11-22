@@ -67,6 +67,50 @@ export default function Dashboard() {
     { label: "Từ vựng đã thuộc", value: `${learnedVocabCount}/612 từ`, color: "text-info", icon: "🧠" },
   ];
 
+  if (!user) {
+    return (
+      <div className="d-flex flex-column min-vh-100">
+        <Navbar />
+        <div className="page-shell flex-grow-1 d-flex align-items-center py-5">
+          <div className="container">
+            <div className="row justify-content-center">
+              <div className="col-md-7 col-lg-5 text-center">
+                <div className="auth-card p-4 p-md-5 shadow-sm border rounded-4 bg-white">
+                  <div className="mb-3" style={{ fontSize: "3.5rem" }}>📊</div>
+                  <h3 className="fw-bold mb-2">Góc Học Tập Cá Nhân</h3>
+                  <p className="text-muted mb-4">
+                    Vui lòng <b>đăng nhập</b> hoặc <b>tạo tài khoản</b> để xem lịch sử làm bài thi, phân tích điểm số và theo dõi tiến độ học tập của bạn trong cơ sở dữ liệu.
+                  </p>
+                  <div className="d-grid gap-2">
+                    <Link
+                      to="/login?redirect=/dashboard"
+                      className="btn btn-primary py-2.5 fw-bold rounded-pill"
+                    >
+                      Đăng Nhập Ngay
+                    </Link>
+                    <Link
+                      to="/register?redirect=/dashboard"
+                      className="btn btn-outline-primary py-2.5 fw-bold rounded-pill"
+                    >
+                      Đăng Ký Tài Khoản Học Viên
+                    </Link>
+                    <Link
+                      to="/"
+                      className="btn btn-link text-muted mt-2 text-decoration-none small"
+                    >
+                      ← Về trang chủ
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar />

@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import api from "../../services/api";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const redirectUrl = searchParams.get("redirect");
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -15,10 +18,14 @@ export default function Login() {
     if (user) {
       try {
         const parsed = JSON.parse(user);
-        navigate(parsed.role === "Admin" ? "/admin" : "/dashboard");
+        if (redirectUrl) {
+          navigate(redirectUrl);
+        } else {
+          navigate(parsed.role === "Admin" ? "/admin" : "/dashboard");
+        }
       } catch {}
     }
-  }, [navigate]);
+  }, [navigate, redirectUrl]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -40,7 +47,11 @@ export default function Login() {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      navigate(res.data.user.role === "Admin" ? "/admin" : "/dashboard");
+      if (redirectUrl) {
+        navigate(redirectUrl);
+      } else {
+        navigate(res.data.user.role === "Admin" ? "/admin" : "/dashboard");
+      }
     } catch (error) {
       setMessage(error.response?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại email, mật khẩu hoặc kết nối mạng.");
     } finally {
@@ -61,6 +72,12 @@ export default function Login() {
                 <h2 className="fw-bold mb-1">Đăng nhập</h2>
                 <p className="text-muted small mb-0">Đăng nhập để lưu tiến độ và lịch sử làm bài thi</p>
               </div>
+
+              {redirectUrl && (
+                <div className="alert alert-info border-0 rounded-4 text-center small mb-3">
+                  🔒 Vui lòng đăng nhập để bắt đầu làm bài và lưu kết quả vào cơ sở dữ liệu.
+                </div>
+              )}
 
               {message && (
                 <div className={`alert ${message.includes("thành công") ? "alert-success" : "alert-danger"} text-center rounded-4`}>
@@ -110,7 +127,13 @@ export default function Login() {
               </form>
 
               <p className="text-center mt-4 mb-0">
-                Chưa có tài khoản? <Link to="/register" className="fw-bold text-primary">Đăng ký ngay</Link>
+                Chưa có tài khoản?{" "}
+                <Link
+                  to={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : "/register"}
+                  className="fw-bold text-primary"
+                >
+                  Đăng ký ngay
+                </Link>
               </p>
             </div>
           </div>

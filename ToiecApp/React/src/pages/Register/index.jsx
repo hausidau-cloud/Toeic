@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import api from "../../services/api";
 
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const redirectUrl = searchParams.get("redirect");
 
   const [form, setForm] = useState({
     fullName: "",
@@ -20,10 +23,14 @@ export default function Register() {
     if (user) {
       try {
         const parsed = JSON.parse(user);
-        navigate(parsed.role === "Admin" ? "/admin" : "/dashboard");
+        if (redirectUrl) {
+          navigate(redirectUrl);
+        } else {
+          navigate(parsed.role === "Admin" ? "/admin" : "/dashboard");
+        }
       } catch {}
     }
-  }, [navigate]);
+  }, [navigate, redirectUrl]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -50,7 +57,9 @@ export default function Register() {
       setLoading(true);
       const res = await api.post("/auth/register", form);
       setMessage(res.data.message || "Đăng ký thành công! Đang chuyển hướng đăng nhập...");
-      setTimeout(() => navigate("/login"), 1000);
+      setTimeout(() => {
+        navigate(redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : "/login");
+      }, 1000);
     } catch (error) {
       setMessage(error.response?.data?.message || "Đăng ký không thành công. Vui lòng kiểm tra lại thông tin hoặc thử lại sau.");
     } finally {
@@ -71,6 +80,12 @@ export default function Register() {
                 <h2 className="fw-bold mb-1">Đăng ký tài khoản</h2>
                 <p className="text-muted small mb-0">Tạo tài khoản học viên để lưu tiến độ ôn luyện TOEIC</p>
               </div>
+
+              {redirectUrl && (
+                <div className="alert alert-info border-0 rounded-4 text-center small mb-3">
+                  🔒 Tạo tài khoản để bắt đầu làm bài và lưu kết quả vào cơ sở dữ liệu.
+                </div>
+              )}
 
               {message && (
                 <div
@@ -150,7 +165,13 @@ export default function Register() {
               </form>
 
               <p className="text-center mt-4 mb-0">
-                Đã có tài khoản? <Link to="/login" className="fw-bold text-primary">Đăng nhập</Link>
+                Đã có tài khoản?{" "}
+                <Link
+                  to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : "/login"}
+                  className="fw-bold text-primary"
+                >
+                  Đăng nhập
+                </Link>
               </p>
             </div>
           </div>
