@@ -118,7 +118,7 @@ CREATE TABLE `grammar_questions` (
 -- SEED DATA
 -- ========================================================
 INSERT INTO `users` (`id`, `full_name`, `email`, `password_hash`, `role`) VALUES
-(1, 'Quản trị viên Admin', 'admin@gmail.com', '$2b$10$DXyevmqwJv1InDPzoROFn./5AqdNJc3RQ78Cln2HUsKWma//HrTcO', 'Admin'),
+(1, 'Quản trị viên Admin', 'admin@gmail.com', '$2b$10$88cgQr1aeKZgHI0nKJ4w7.i/2NV0fACuJCGRXYejI.9GvV9XIiLJ6', 'Admin'),
 (2, 'Nguyễn Văn Học Viên', 'hocvien@gmail.com', '$2b$10$xZCGvVk76j2FrVJ8Hpqdqea8cado71ZDpEYVqjkaKeAT1Q0B1vDKC', 'User');
 
 -- Đề thi mẫu

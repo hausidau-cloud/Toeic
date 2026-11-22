@@ -18,25 +18,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Tài khoản Admin mặc định
-    if (email === "admin@gmail.com" && password === "31072005") {
-      const token = jwt.sign(
-        { id: 1, email: "admin@gmail.com", role: "Admin" },
-        JWT_SECRET,
-        { expiresIn: "7d" }
-      );
-      return res.json({
-        message: "Đăng nhập admin thành công",
-        token,
-        user: {
-          id: 1,
-          fullName: "Admin Quản trị",
-          email: "admin@gmail.com",
-          role: "Admin",
-        },
-      });
-    }
-
     // Truy vấn tài khoản từ MySQL
     const [rows] = await pool.query(
       "SELECT id, full_name, email, password_hash, role FROM users WHERE email = ?",
