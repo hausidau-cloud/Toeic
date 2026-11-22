@@ -37,8 +37,8 @@ export default function Courses() {
     },
     {
       id: 1,
-      title: "0 GRAMMAR FOR TOEIC (10 Chủ Điểm Part 5)",
-      desc: "Trích xuất chuẩn từ giáo trình 0 GRAMMAR FOR TOEIC: Câu từ loại, Mệnh đề quan hệ (who/which/that), Tính từ V-ed/V-ing, Điều kiện đảo ngữ, Bị động, Liên từ...",
+      title: "10 Chủ Điểm Ngữ Pháp Trọng Tâm (Part 5)",
+      desc: "Làm chủ 10 chủ điểm cốt lõi Part 5: Câu từ loại, Mệnh đề quan hệ (who/which/that), Tính từ V-ed/V-ing, Điều kiện đảo ngữ, Bị động, Liên từ...",
       icon: "✍️",
       level: "Target 450 - 750+ Part 5",
       lessons: "10 chủ điểm (100+ câu)",

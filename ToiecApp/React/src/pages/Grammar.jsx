@@ -151,7 +151,7 @@ export default function Grammar() {
           <div className="row align-items-center">
             <div className="col-lg-8">
               <div className="d-inline-flex align-items-center gap-2 bg-white bg-opacity-20 px-3 py-1 rounded-pill mb-3 text-white small fw-bold">
-                <span>📚 0 GRAMMAR FOR TOEIC</span>
+                <span>📚 10 CHỦ ĐIỂM NGỮ PHÁP PART 5</span>
                 <span>•</span>
                 <span>Bộ tài liệu 10 bài chuẩn ngữ pháp Part 5</span>
               </div>

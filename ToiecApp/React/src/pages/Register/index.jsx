@@ -52,7 +52,7 @@ export default function Register() {
       setMessage(res.data.message || "Đăng ký thành công! Đang chuyển hướng đăng nhập...");
       setTimeout(() => navigate("/login"), 1000);
     } catch (error) {
-      setMessage(error.response?.data?.message || "Không kết nối được server. Hãy kiểm tra backend đã chạy chưa.");
+      setMessage(error.response?.data?.message || "Đăng ký không thành công. Vui lòng kiểm tra lại thông tin hoặc thử lại sau.");
     } finally {
       setLoading(false);
     }

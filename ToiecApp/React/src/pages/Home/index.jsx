@@ -62,8 +62,8 @@ export default function Home() {
       badge: "Sẵn sàng học"
     },
     {
-      title: "0 GRAMMAR FOR TOEIC",
-      lessons: "10 chủ điểm Part 5",
+      title: "10 Chủ Điểm Ngữ Pháp Part 5",
+      lessons: "10 chủ điểm (100+ câu)",
       level: "Target 450 - 750+",
       icon: "✍️",
       desc: "Làm chủ Câu từ loại, Mệnh đề quan hệ (who/which/that), Tính từ, Động từ, Bị động, Liên từ...",
@@ -91,7 +91,7 @@ export default function Home() {
   ];
 
   const features = [
-    { title: "Ngữ pháp 10 chủ điểm Part 5", icon: "📖", link: "/grammar", desc: "Tổng hợp công thức, mẹo bẫy đề và bài tập trắc nghiệm giải chi tiết theo 0 GRAMMAR FOR TOEIC." },
+    { title: "Ngữ pháp 10 chủ điểm Part 5", icon: "📖", link: "/grammar", desc: "Tổng hợp công thức, mẹo bẫy đề và bài tập trắc nghiệm giải chi tiết cho 10 chủ điểm Part 5." },
     { title: "Flashcard 600 từ vựng & Cụm từ", icon: "🧠", link: "/vocabulary", desc: "Kho từ vựng 50 bài học Barron's với phiên âm, audio và trắc nghiệm đảo chiều." },
     { title: "50 Đề Luyện Reading Part 5, 6, 7", icon: "📝", link: "/practice", desc: "Bộ 50 đề thi thực chiến bám sát bài học PDF, có phân loại theo từng Part." },
     { title: "Thi thử có bấm giờ 20 phút", icon: "⏱", link: "/practice", desc: "Đồng hồ đếm ngược giúp bạn làm quen với áp lực phòng thi thật." },

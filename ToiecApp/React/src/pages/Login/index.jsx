@@ -42,14 +42,10 @@ export default function Login() {
 
       navigate(res.data.user.role === "Admin" ? "/admin" : "/dashboard");
     } catch (error) {
-      setMessage(error.response?.data?.message || "Không kết nối được server. Hãy kiểm tra backend đã chạy chưa.");
+      setMessage(error.response?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại email, mật khẩu hoặc kết nối mạng.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const setPreset = (email, password) => {
-    setForm({ email, password });
   };
 
   return (
@@ -112,31 +108,6 @@ export default function Login() {
                   {loading ? "Đang xác thực..." : "Đăng Nhập"}
                 </button>
               </form>
-
-              {/* TÀI KHOẢN MẪU BẤM ĐIỀN NHANH */}
-              <div className="alert alert-light border rounded-4 mt-4 small mb-0">
-                <div className="fw-bold mb-2">💡 Tài khoản mẫu để trải nghiệm:</div>
-                <div className="d-flex justify-content-between align-items-center mb-1">
-                  <span>👑 Admin: <b>admin@gmail.com</b> / <b>123</b></span>
-                  <button
-                    type="button"
-                    className="btn btn-xs btn-outline-primary py-0 px-2"
-                    onClick={() => setPreset("admin@gmail.com", "123")}
-                  >
-                    Điền nhanh
-                  </button>
-                </div>
-                <div className="d-flex justify-content-between align-items-center">
-                  <span>🎓 Học viên: <b>hocvien@gmail.com</b> / <b>123456</b></span>
-                  <button
-                    type="button"
-                    className="btn btn-xs btn-outline-primary py-0 px-2"
-                    onClick={() => setPreset("hocvien@gmail.com", "123456")}
-                  >
-                    Điền nhanh
-                  </button>
-                </div>
-              </div>
 
               <p className="text-center mt-4 mb-0">
                 Chưa có tài khoản? <Link to="/register" className="fw-bold text-primary">Đăng ký ngay</Link>

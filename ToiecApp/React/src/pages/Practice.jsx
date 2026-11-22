@@ -35,7 +35,7 @@ export default function Practice() {
         const res = await toeicApi.getTests(params);
         setTests(res.data.data || []);
       } catch (err) {
-        setError(err.response?.data?.message || "Không gọi được API đề TOEIC. Hãy kiểm tra backend đã chạy chưa.");
+        setError(err.response?.data?.message || "Không thể tải danh sách đề thi. Vui lòng thử lại sau.");
       } finally {
         setLoading(false);
       }
