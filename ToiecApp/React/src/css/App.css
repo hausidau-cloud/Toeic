@@ -277,6 +277,26 @@ a { text-decoration: none; }
   background: linear-gradient(135deg, var(--primary-dark), #1e40af);
 }
 
+/* Quizizz Arena Styles */
+.quiz-arena-shell {
+  min-height: calc(100vh - 70px);
+  background: radial-gradient(circle at 50% 15%, #1e1b4b 0%, #0f172a 60%, #020617 100%) !important;
+  color: #f8fafc !important;
+  padding: 30px 0 60px 0;
+}
+
+.quiz-card-dark {
+  background: rgba(30, 41, 59, 0.94) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6) !important;
+}
+
+.quiz-record-banner {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.3) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
 .page-shell {
   min-height: 100vh;
   padding: 58px 0;

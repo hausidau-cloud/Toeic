@@ -57,8 +57,15 @@ export const grammarApi = {
 
 export const quizApi = {
   getQuestions: (params = {}) => api.get("/quiz/questions", { params }),
+  getRecord: () => api.get("/quiz/record"),
   submitScore: (data) => api.post("/quiz/submit", data),
   getLeaderboard: (params = {}) => api.get("/quiz/leaderboard", { params }),
+  createRoom: (data) => api.post("/quiz/room/create", data),
+  joinRoom: (data) => api.post("/quiz/room/join", data),
+  getRoom: (code) => api.get(`/quiz/room/${code}`),
+  startRoom: (code) => api.post(`/quiz/room/${code}/start`),
+  addBot: (code) => api.post(`/quiz/room/${code}/add-bot`),
+  submitRoom: (code, data) => api.post(`/quiz/room/${code}/submit`, data),
 };
 
 export default api;
