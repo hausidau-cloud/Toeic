@@ -12,30 +12,66 @@ function shuffleArray(array) {
   return arr;
 }
 
-// HÀM SINH BỘ CÂU HỎI QUIZ DÙNG CHUNG (Ngữ pháp + Từ vựng)
-async function generateQuestions(count = 10, mode = "all") {
+// HÀM SINH BỘ CÂU HỎI QUIZ DÙNG CHUNG THEO MỨC ĐỘ KHÓ DỄ
+async function generateQuestions(count = 10, mode = "all", difficulty = "medium") {
   const totalCount = Math.min(20, Math.max(5, count));
   let grammarTarget = mode === "grammar" ? totalCount : mode === "vocab" ? 0 : Math.floor(totalCount / 2);
   let vocabTarget = totalCount - grammarTarget;
 
+  const validDiff = ["easy", "medium", "hard"].includes(difficulty) ? difficulty : "medium";
   const questions = [];
 
   // A. LẤY CÂU HỎI NGỮ PHÁP (PART 5)
   if (grammarTarget > 0) {
-    const [gRows] = await pool.query(
+    let topicWhere = "";
+    if (validDiff === "easy") {
+      // Dễ: Các chủ điểm nền tảng (Word Forms, So Sánh, Đại Từ)
+      topicWhere = "WHERE g.topic_id IN (1, 5, 9)";
+    } else if (validDiff === "hard") {
+      // Khó: Mệnh đề quan hệ nâng cao, Câu điều kiện & đảo ngữ, Liên từ & giới từ phức tạp
+      topicWhere = "WHERE g.topic_id IN (2, 7, 10, 4)";
+    } else {
+      // Trung bình: Các chủ điểm phổ biến Part 5
+      topicWhere = "WHERE g.topic_id IN (1, 3, 4, 6, 8, 10)";
+    }
+
+    let [gRows] = await pool.query(
       `SELECT g.id, g.question_text, g.option_a, g.option_b, g.option_c, g.option_d, g.correct_answer, g.explanation, t.title as topic_title
        FROM grammar_questions g
        LEFT JOIN grammar_topics t ON g.topic_id = t.id
+       ${topicWhere}
        ORDER BY RAND()
        LIMIT ?`,
       [grammarTarget]
     );
 
+    // Bổ sung nếu không đủ câu hỏi theo filter chủ đề
+    if (gRows.length < grammarTarget) {
+      const remaining = grammarTarget - gRows.length;
+      const [fallbackRows] = await pool.query(
+        `SELECT g.id, g.question_text, g.option_a, g.option_b, g.option_c, g.option_d, g.correct_answer, g.explanation, t.title as topic_title
+         FROM grammar_questions g
+         LEFT JOIN grammar_topics t ON g.topic_id = t.id
+         ORDER BY RAND()
+         LIMIT ?`,
+        [remaining]
+      );
+      gRows = [...gRows, ...fallbackRows];
+    }
+
+    const diffBadge =
+      validDiff === "easy"
+        ? "🟢 Dễ · Part 5"
+        : validDiff === "hard"
+        ? "🔥 Khó · Part 5"
+        : "📖 Ngữ Pháp";
+
     for (const item of gRows) {
       questions.push({
         id: `grammar_${item.id}`,
         categoryType: "grammar",
-        badge: "📖 Ngữ Pháp",
+        badge: diffBadge,
+        difficulty: validDiff,
         topic: item.topic_title || "Ngữ Pháp TOEIC Part 5",
         prompt: item.question_text,
         subPrompt: "Chọn đáp án đúng nhất để hoàn thành câu:",
@@ -53,20 +89,41 @@ async function generateQuestions(count = 10, mode = "all") {
 
   // B. LẤY CÂU HỎI TỪ VỰNG (BARRON'S + CỤM TỪ ĂN ĐIỂM)
   if (vocabTarget > 0) {
-    const [vRows] = await pool.query(
+    let vocabWhere = "";
+    if (validDiff === "easy") {
+      vocabWhere = "WHERE word_type IN ('noun', 'verb', 'adjective')";
+    } else if (validDiff === "hard") {
+      vocabWhere = "WHERE word_type IN ('collocation', 'phrasal_verb', 'verb')";
+    }
+
+    let [vRows] = await pool.query(
       `SELECT id, word_or_phrase, phonetic, word_type, meaning, example_sentence, example_meaning, category
        FROM vocabularies
+       ${vocabWhere}
        ORDER BY RAND()
        LIMIT ?`,
-      [vocabTarget + 20]
+      [vocabTarget + 25]
     );
+
+    if (vRows.length < vocabTarget + 5) {
+      const [fallbackV] = await pool.query(
+        `SELECT id, word_or_phrase, phonetic, word_type, meaning, example_sentence, example_meaning, category
+         FROM vocabularies
+         ORDER BY RAND()
+         LIMIT ?`,
+        [vocabTarget + 25]
+      );
+      vRows = fallbackV;
+    }
 
     const targetWords = vRows.slice(0, vocabTarget);
     const distractorPool = vRows.slice(vocabTarget);
 
+    const clozeThreshold = validDiff === "hard" ? 0.75 : validDiff === "easy" ? 0.25 : 0.5;
+
     for (let i = 0; i < targetWords.length; i++) {
       const item = targetWords[i];
-      const isCloze = Boolean(item.example_sentence && Math.random() > 0.5);
+      const isCloze = Boolean(item.example_sentence && Math.random() < clozeThreshold);
 
       if (isCloze && item.example_sentence.toLowerCase().includes(item.word_or_phrase.toLowerCase())) {
         const regex = new RegExp(item.word_or_phrase, "gi");
@@ -89,7 +146,8 @@ async function generateQuestions(count = 10, mode = "all") {
         questions.push({
           id: `vocab_cloze_${item.id}`,
           categoryType: "vocab",
-          badge: "✍️ Điền Từ",
+          badge: validDiff === "hard" ? "🔥 Khó · Điền Từ" : validDiff === "easy" ? "🟢 Dễ · Điền Từ" : "✍️ Điền Từ",
+          difficulty: validDiff,
           topic: item.category || "Từ vựng TOEIC Barron's",
           prompt: blankedSentence,
           subPrompt: `Dịch câu: "${item.example_meaning || ""}". Điền từ thích hợp vào chỗ trống:`,
@@ -115,7 +173,8 @@ async function generateQuestions(count = 10, mode = "all") {
         questions.push({
           id: `vocab_meaning_${item.id}`,
           categoryType: "vocab",
-          badge: "🧠 Đoán Nghĩa",
+          badge: validDiff === "hard" ? "🔥 Khó · Đoán Nghĩa" : validDiff === "easy" ? "🟢 Dễ · Đoán Nghĩa" : "🧠 Đoán Nghĩa",
+          difficulty: validDiff,
           topic: item.category || "600 Từ Vựng Barron's",
           prompt: `Từ/Cụm từ: "${item.word_or_phrase}" ${item.phonetic ? `(${item.phonetic})` : ""}`,
           subPrompt: "Ý nghĩa chính xác nhất của từ này là gì?",
@@ -130,16 +189,18 @@ async function generateQuestions(count = 10, mode = "all") {
   return shuffleArray(questions);
 }
 
-// 1. LẤY BỘ CÂU HỎI QUIZ CHO ĐẤU ĐƠN
+// 1. LẤY BỘ CÂU HỎI QUIZ CHO ĐẤU ĐƠN (HỖ TRỢ MỨC ĐỘ KHÓ DỄ)
 router.get("/questions", async (req, res) => {
   try {
     const count = parseInt(req.query.count) || 10;
     const mode = req.query.mode || "all";
-    const data = await generateQuestions(count, mode);
+    const difficulty = req.query.difficulty || "medium";
+    const data = await generateQuestions(count, mode, difficulty);
 
     res.json({
       status: "success",
       total: data.length,
+      difficulty,
       data,
     });
   } catch (error) {
@@ -151,12 +212,17 @@ router.get("/questions", async (req, res) => {
 // 2. LẤY KỶ LỤC ĐIỂM CAO NHẤT HIỆN TẠI (ALL-TIME RECORD)
 router.get("/record", async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      `SELECT player_name, score, correct_count, total_questions, time_spent, streak_max, created_at
-       FROM quiz_leaderboard
-       ORDER BY score DESC, time_spent ASC
-       LIMIT 1`
-    );
+    const difficulty = req.query.difficulty;
+    let query = `SELECT player_name, score, correct_count, total_questions, time_spent, streak_max, difficulty, created_at
+                 FROM quiz_leaderboard `;
+    const params = [];
+    if (difficulty && ["easy", "medium", "hard"].includes(difficulty)) {
+      query += `WHERE difficulty = ? `;
+      params.push(difficulty);
+    }
+    query += `ORDER BY score DESC, time_spent ASC LIMIT 1`;
+
+    const [rows] = await pool.query(query, params);
 
     const record = rows[0] || {
       player_name: "Chưa có kỷ lục",
@@ -165,6 +231,7 @@ router.get("/record", async (req, res) => {
       total_questions: 10,
       time_spent: 0,
       streak_max: 0,
+      difficulty: difficulty || "medium",
     };
 
     res.json({ status: "success", data: record });
@@ -177,7 +244,7 @@ router.get("/record", async (req, res) => {
 // 3. NỘP KẾT QUẢ ĐẤU ĐƠN & LƯU BẢNG XẾP HẠNG
 router.post("/submit", async (req, res) => {
   try {
-    const { userId, playerName, score, correctCount, totalQuestions, timeSpent, streakMax } = req.body;
+    const { userId, playerName, score, correctCount, totalQuestions, timeSpent, streakMax, difficulty = "medium" } = req.body;
 
     if (!playerName || typeof score !== "number") {
       return res.status(400).json({ message: "Thiếu dữ liệu kết quả thi đấu" });
@@ -189,11 +256,12 @@ router.post("/submit", async (req, res) => {
     const safeTotal = parseInt(totalQuestions) || 10;
     const safeTime = parseInt(timeSpent) || 0;
     const safeStreak = parseInt(streakMax) || 0;
+    const validDiff = ["easy", "medium", "hard"].includes(difficulty) ? difficulty : "medium";
 
     const [result] = await pool.query(
-      `INSERT INTO quiz_leaderboard (user_id, player_name, score, correct_count, total_questions, time_spent, streak_max)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [safeUserId, playerName.slice(0, 100), safeScore, safeCorrect, safeTotal, safeTime, safeStreak]
+      `INSERT INTO quiz_leaderboard (user_id, player_name, score, correct_count, total_questions, time_spent, streak_max, difficulty)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [safeUserId, playerName.slice(0, 100), safeScore, safeCorrect, safeTotal, safeTime, safeStreak, validDiff]
     );
 
     const [rankRows] = await pool.query(
@@ -205,6 +273,7 @@ router.post("/submit", async (req, res) => {
       status: "success",
       message: "Lưu thành tích Quiz thành công!",
       recordId: result.insertId,
+      difficulty: validDiff,
       rank: rankRows[0]?.user_rank || 1,
     });
   } catch (error) {
@@ -213,27 +282,34 @@ router.post("/submit", async (req, res) => {
   }
 });
 
-// 4. LẤY BẢNG XẾP HẠNG (LEADERBOARD)
+// 4. LẤY BẢNG XẾP HẠNG (LEADERBOARD) - CÓ THỂ LỌC THEO MỨC ĐỘ
 router.get("/leaderboard", async (req, res) => {
   try {
     const limit = Math.min(50, Math.max(5, parseInt(req.query.limit) || 20));
+    const difficulty = req.query.difficulty;
 
-    const [rows] = await pool.query(
-      `SELECT id, user_id, player_name, score, correct_count, total_questions, time_spent, streak_max, created_at
-       FROM quiz_leaderboard
-       ORDER BY score DESC, time_spent ASC, created_at ASC
-       LIMIT ?`,
-      [limit]
-    );
+    let query = `SELECT id, user_id, player_name, score, correct_count, total_questions, time_spent, streak_max, difficulty, created_at
+                 FROM quiz_leaderboard `;
+    const params = [];
+    if (difficulty && ["easy", "medium", "hard"].includes(difficulty)) {
+      query += `WHERE difficulty = ? `;
+      params.push(difficulty);
+    }
+    query += `ORDER BY score DESC, time_spent ASC, created_at ASC LIMIT ?`;
+    params.push(limit);
+
+    const [rows] = await pool.query(query, params);
 
     const leaderboard = rows.map((item, index) => ({
       rank: index + 1,
       ...item,
+      difficulty: item.difficulty || "medium",
     }));
 
     res.json({
       status: "success",
       total: leaderboard.length,
+      difficulty: difficulty || "all",
       data: leaderboard,
     });
   } catch (error) {
@@ -246,11 +322,13 @@ router.get("/leaderboard", async (req, res) => {
 // 5. CÁC API PHÒNG THÁCH ĐẤU NHIỀU NGƯỜI (MULTIPLAYER ROOM)
 // ========================================================
 
-// Tạo phòng mới (Host)
+// Tạo phòng mới (Host) - Hỗ trợ mức độ khó dễ
 router.post("/room/create", async (req, res) => {
   try {
-    const { hostUserId, hostName, mode = "all" } = req.body;
+    const { hostUserId, hostName, mode = "all", difficulty = "medium" } = req.body;
     if (!hostName) return res.status(400).json({ message: "Vui lòng nhập tên người tạo phòng" });
+
+    const validDiff = ["easy", "medium", "hard"].includes(difficulty) ? difficulty : "medium";
 
     let roomCode = "";
     let isUnique = false;
@@ -260,12 +338,12 @@ router.post("/room/create", async (req, res) => {
       if (ex.length === 0) isUnique = true;
     }
 
-    const questions = await generateQuestions(10, mode);
+    const questions = await generateQuestions(10, mode, validDiff);
 
     const [roomResult] = await pool.query(
-      `INSERT INTO quiz_rooms (room_code, host_user_id, host_name, status, mode, questions_json)
-       VALUES (?, ?, ?, 'waiting', ?, ?)`,
-      [roomCode, hostUserId || 0, hostName, mode, JSON.stringify(questions)]
+      `INSERT INTO quiz_rooms (room_code, host_user_id, host_name, status, mode, difficulty, questions_json)
+       VALUES (?, ?, ?, 'waiting', ?, ?, ?)`,
+      [roomCode, hostUserId || 0, hostName, mode, validDiff, JSON.stringify(questions)]
     );
 
     const roomId = roomResult.insertId;
@@ -281,6 +359,7 @@ router.post("/room/create", async (req, res) => {
       roomCode,
       roomId,
       hostName,
+      difficulty: validDiff,
     });
   } catch (error) {
     console.error("Room create error:", error);
@@ -297,7 +376,7 @@ router.post("/room/join", async (req, res) => {
     }
 
     const [rooms] = await pool.query(
-      `SELECT id, room_code, status, host_name FROM quiz_rooms WHERE room_code = ?`,
+      `SELECT id, room_code, status, host_name, difficulty FROM quiz_rooms WHERE room_code = ?`,
       [String(roomCode).trim()]
     );
 
@@ -328,6 +407,7 @@ router.post("/room/join", async (req, res) => {
       message: "Tham gia phòng thành công!",
       roomCode: room.room_code,
       roomId: room.id,
+      difficulty: room.difficulty || "medium",
     });
   } catch (error) {
     console.error("Room join error:", error);
@@ -340,7 +420,7 @@ router.get("/room/:code", async (req, res) => {
   try {
     const roomCode = String(req.params.code).trim();
     const [rooms] = await pool.query(
-      `SELECT id, room_code, host_user_id, host_name, status, mode, questions_json, created_at
+      `SELECT id, room_code, host_user_id, host_name, status, mode, difficulty, questions_json, created_at
        FROM quiz_rooms WHERE room_code = ?`,
       [roomCode]
     );
@@ -373,6 +453,7 @@ router.get("/room/:code", async (req, res) => {
         hostName: room.host_name,
         status: room.status,
         mode: room.mode,
+        difficulty: room.difficulty || "medium",
         playerCount: players.length,
         players,
         questions,
@@ -389,7 +470,7 @@ router.post("/room/:code/start", async (req, res) => {
   try {
     const roomCode = String(req.params.code).trim();
     const [rooms] = await pool.query(
-      `SELECT id, status FROM quiz_rooms WHERE room_code = ?`,
+      `SELECT id, status, difficulty FROM quiz_rooms WHERE room_code = ?`,
       [roomCode]
     );
 
@@ -463,10 +544,11 @@ router.post("/room/:code/submit", async (req, res) => {
     const roomCode = String(req.params.code).trim();
     const { playerName, score, correctCount, timeSpent, streakMax, userId } = req.body;
 
-    const [rooms] = await pool.query(`SELECT id FROM quiz_rooms WHERE room_code = ?`, [roomCode]);
+    const [rooms] = await pool.query(`SELECT id, difficulty FROM quiz_rooms WHERE room_code = ?`, [roomCode]);
     if (rooms.length === 0) return res.status(404).json({ message: "Phòng không tồn tại" });
 
     const roomId = rooms[0].id;
+    const roomDiff = rooms[0].difficulty || "medium";
 
     // Cập nhật điểm của người chơi
     await pool.query(
@@ -479,9 +561,9 @@ router.post("/room/:code/submit", async (req, res) => {
     // Cũng lưu vào bảng xếp hạng chung nếu điểm cao
     if (score > 0) {
       await pool.query(
-        `INSERT INTO quiz_leaderboard (user_id, player_name, score, correct_count, total_questions, time_spent, streak_max)
-         VALUES (?, ?, ?, ?, 10, ?, ?)`,
-        [userId || 0, playerName, score, correctCount, timeSpent, streakMax]
+        `INSERT INTO quiz_leaderboard (user_id, player_name, score, correct_count, total_questions, time_spent, streak_max, difficulty)
+         VALUES (?, ?, ?, ?, 10, ?, ?, ?)`,
+        [userId || 0, playerName, score, correctCount, timeSpent, streakMax, roomDiff]
       );
     }
 
@@ -494,7 +576,8 @@ router.post("/room/:code/submit", async (req, res) => {
     for (const b of bots) {
       const botCorrect = Math.floor(Math.random() * 4) + 6;
       const botTime = Math.floor(Math.random() * 25) + 35;
-      const botScore = botCorrect * 800 + Math.floor(Math.random() * 1000);
+      const basePts = roomDiff === "hard" ? 1200 : roomDiff === "easy" ? 650 : 800;
+      const botScore = botCorrect * basePts + Math.floor(Math.random() * 800);
       await pool.query(
         `UPDATE quiz_room_players SET score = ?, correct_count = ?, time_spent = ?, streak_max = ?, is_finished = 1 WHERE id = ?`,
         [botScore, botCorrect, botTime, Math.floor(botCorrect / 2), b.id]
@@ -513,6 +596,7 @@ router.post("/room/:code/submit", async (req, res) => {
     res.json({
       status: "success",
       message: "Đã nộp bài thách đấu thành công!",
+      difficulty: roomDiff,
       rankings,
     });
   } catch (error) {

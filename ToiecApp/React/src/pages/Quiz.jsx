@@ -85,6 +85,52 @@ class SoundFX {
 
 const sfx = new SoundFX();
 
+// CẤU HÌNH CÁC MỨC ĐỘ KHÓ DỄ CỦA ĐẤU TRƯỜNG
+export const DIFFICULTY_CONFIG = {
+  easy: {
+    key: "easy",
+    label: "Dễ",
+    subLabel: "Target 350 - 500",
+    badge: "🟢 Dễ (Khởi Động)",
+    maxTime: 20,
+    baseScore: 800,
+    timeDeductionPerSec: 35,
+    streakBonus: (s) => (s >= 5 ? 120 : s >= 3 ? 60 : s >= 1 ? 30 : 0),
+    color: "#10b981",
+    themeBg: "rgba(16, 185, 129, 0.15)",
+    themeBorder: "#10b981",
+    description: "20s/câu · Tối đa 800đ/câu · Ngữ pháp từ loại & từ vựng đơn cơ bản",
+  },
+  medium: {
+    key: "medium",
+    label: "Tiêu Chuẩn",
+    subLabel: "Target 550 - 750",
+    badge: "🟡 Tiêu Chuẩn (Part 5)",
+    maxTime: 15,
+    baseScore: 1000,
+    timeDeductionPerSec: 55,
+    streakBonus: (s) => (s >= 5 ? 200 : s >= 3 ? 100 : s >= 1 ? 50 : 0),
+    color: "#f59e0b",
+    themeBg: "rgba(245, 158, 11, 0.15)",
+    themeBorder: "#f59e0b",
+    description: "15s/câu · Tối đa 1.000đ/câu · Đề chuẩn thi TOEIC Part 5 & 600 từ Barron's",
+  },
+  hard: {
+    key: "hard",
+    label: "Khó",
+    subLabel: "Target 800 - 990+",
+    badge: "🔥 Khó (Thần Tốc)",
+    maxTime: 10,
+    baseScore: 1500,
+    timeDeductionPerSec: 100,
+    streakBonus: (s) => (s >= 5 ? 400 : s >= 3 ? 200 : s >= 1 ? 100 : 0),
+    color: "#ef4444",
+    themeBg: "rgba(239, 68, 68, 0.15)",
+    themeBorder: "#ef4444",
+    description: "10s/câu · Tối đa 1.500đ/câu · Mệnh đề đảo ngữ & bẫy cụm từ Collocations",
+  },
+};
+
 export default function Quiz() {
   const user = useMemo(() => {
     try {
@@ -100,7 +146,13 @@ export default function Quiz() {
   const [activeTab, setActiveTab] = useState("solo");
   const [soundOn, setSoundOn] = useState(true);
 
-  // Kỷ lục cao nhất hiện tại (All-time Record)
+  // MỨC ĐỘ KHÓ DỄ: "easy" (Dễ - 20s/câu) | "medium" (Tiêu chuẩn - 15s/câu) | "hard" (Khó - 10s/câu)
+  const [difficulty, setDifficulty] = useState("medium");
+  const [lbDifficulty, setLbDifficulty] = useState("all");
+
+  const currentDiffCfg = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.medium;
+
+  // Kỷ lục cao nhất hiện tại (All-time Record theo độ khó)
   const [recordHolder, setRecordHolder] = useState(null);
   const [isNewRecord, setIsNewRecord] = useState(false);
 
@@ -116,9 +168,8 @@ export default function Quiz() {
   const [maxStreak, setMaxStreak] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
 
-  // Bộ đếm thời gian mỗi câu (15s)
-  const QUESTION_MAX_TIME = 15;
-  const [timeLeft, setTimeLeft] = useState(QUESTION_MAX_TIME);
+  // Bộ đếm thời gian mỗi câu (tùy theo mức độ: 20s, 15s hoặc 10s)
+  const [timeLeft, setTimeLeft] = useState(currentDiffCfg.maxTime);
   const timerRef = useRef(null);
   const questionStartTimeRef = useRef(Date.now());
   const gameStartTimeRef = useRef(Date.now());
@@ -139,33 +190,35 @@ export default function Quiz() {
   const [roomRankings, setRoomRankings] = useState([]);
   const roomPollRef = useRef(null);
 
-  // Tải kỷ lục điểm cao nhất
-  const fetchRecord = useCallback(async () => {
+  // Tải kỷ lục điểm cao nhất theo mức độ
+  const fetchRecord = useCallback(async (diff = difficulty) => {
     try {
-      const res = await quizApi.getRecord();
+      const res = await quizApi.getRecord({ difficulty: diff });
       setRecordHolder(res.data.data || null);
     } catch (err) {
       console.warn("Lỗi tải kỷ lục:", err.message);
     }
-  }, []);
+  }, [difficulty]);
 
-  // Tải bảng xếp hạng chung
-  const fetchLeaderboard = useCallback(async () => {
+  // Tải bảng xếp hạng chung (có thể lọc theo mức độ)
+  const fetchLeaderboard = useCallback(async (diff = lbDifficulty) => {
     try {
       setLbLoading(true);
-      const res = await quizApi.getLeaderboard({ limit: 20 });
+      const params = { limit: 20 };
+      if (diff && diff !== "all") params.difficulty = diff;
+      const res = await quizApi.getLeaderboard(params);
       setLeaderboard(res.data.data || []);
     } catch (err) {
       console.warn("Lỗi tải bảng xếp hạng:", err.message);
     } finally {
       setLbLoading(false);
     }
-  }, []);
+  }, [lbDifficulty]);
 
   useEffect(() => {
-    fetchRecord();
-    fetchLeaderboard();
-  }, [fetchRecord, fetchLeaderboard]);
+    fetchRecord(difficulty);
+    fetchLeaderboard(lbDifficulty);
+  }, [fetchRecord, fetchLeaderboard, difficulty, lbDifficulty]);
 
   const toggleSound = () => {
     const next = !soundOn;
@@ -179,7 +232,7 @@ export default function Quiz() {
   const startSoloGame = async () => {
     try {
       setLoadingQuestions(true);
-      const res = await quizApi.getQuestions({ count: 10, mode: quizMode });
+      const res = await quizApi.getQuestions({ count: 10, mode: quizMode, difficulty });
       const qList = res.data.data || [];
 
       if (qList.length === 0) {
@@ -187,6 +240,7 @@ export default function Quiz() {
         return;
       }
 
+      const diffCfg = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.medium;
       setQuestions(qList);
       setCurrentIndex(0);
       setScore(0);
@@ -195,7 +249,7 @@ export default function Quiz() {
       setCorrectCount(0);
       setSelectedOption(null);
       setIsAnswered(false);
-      setTimeLeft(QUESTION_MAX_TIME);
+      setTimeLeft(diffCfg.maxTime);
       setIsNewRecord(false);
       gameStartTimeRef.current = Date.now();
       questionStartTimeRef.current = Date.now();
@@ -208,7 +262,7 @@ export default function Quiz() {
     }
   };
 
-  // ĐIỀU KHIỂN ĐỒNG HỒ ĐẾM NGƯỢC 15s MỖI CÂU
+  // ĐIỀU KHIỂN ĐỒNG HỒ ĐẾM NGƯỢC THEO MỨC ĐỘ
   useEffect(() => {
     if (gameState === "playing" && !isAnswered && timeLeft > 0) {
       timerRef.current = setInterval(() => {
@@ -234,7 +288,7 @@ export default function Quiz() {
     sfx.playWrong();
   };
 
-  // CHỌN ĐÁP ÁN: 1000 ĐIỂM TRỪ THỜI GIAN
+  // CHỌN ĐÁP ÁN: TÍNH ĐIỂM THEO MỨC ĐỘ KHÓ DỄ & THỜI GIAN
   const handleSelectOption = (optKey) => {
     if (isAnswered) return;
     clearInterval(timerRef.current);
@@ -242,18 +296,18 @@ export default function Quiz() {
     const timeSpentOnQ = Math.max(0.5, (Date.now() - questionStartTimeRef.current) / 1000);
     const currentQ = questions[currentIndex];
     const isCorrect = optKey === currentQ.correctKey;
+    const diffCfg = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.medium;
 
     setIsAnswered(true);
     setSelectedOption(optKey);
 
     if (isCorrect) {
-      // Công thức: 1000 điểm trừ đi thời gian (mỗi giây dùng trừ 55 điểm)
-      // Ví dụ: 1s = 945đ, 4s = 780đ, 12s = 340đ
-      const timeDeduction = Math.round(timeSpentOnQ * 55);
-      const baseEarned = Math.max(100, 1000 - timeDeduction);
+      // Công thức: baseScore trừ đi thời gian (theo hệ số của từng mức độ)
+      const timeDeduction = Math.round(timeSpentOnQ * diffCfg.timeDeductionPerSec);
+      const baseEarned = Math.max(100, diffCfg.baseScore - timeDeduction);
 
-      // Thưởng chuỗi (Streak)
-      const streakBonus = streak >= 5 ? 200 : streak >= 3 ? 100 : streak >= 1 ? 50 : 0;
+      // Thưởng chuỗi (Streak) theo mức độ
+      const streakBonus = diffCfg.streakBonus(streak);
       const questionPoints = baseEarned + streakBonus;
 
       setScore((prev) => prev + questionPoints);
@@ -275,11 +329,12 @@ export default function Quiz() {
   };
 
   const handleNextQuestion = () => {
+    const diffCfg = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.medium;
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswered(false);
-      setTimeLeft(QUESTION_MAX_TIME);
+      setTimeLeft(diffCfg.maxTime);
       questionStartTimeRef.current = Date.now();
     } else {
       finishGame();
@@ -322,10 +377,11 @@ export default function Quiz() {
           totalQuestions: questions.length,
           timeSpent: elapsedSeconds,
           streakMax: maxStreak,
+          difficulty,
         });
         setMyRank(res.data.rank || 1);
-        fetchLeaderboard();
-        fetchRecord();
+        fetchLeaderboard(lbDifficulty);
+        fetchRecord(difficulty);
       }
     } catch (err) {
       console.warn("Lỗi lưu điểm:", err.message);
@@ -344,12 +400,14 @@ export default function Quiz() {
         hostUserId: user?.id || 0,
         hostName: myName,
         mode: quizMode,
+        difficulty,
       });
 
       setCurrentRoom({
         roomCode: res.data.roomCode,
         id: res.data.roomId,
         hostName: myName,
+        difficulty: res.data.difficulty || difficulty,
         isHost: true,
         players: [{ player_name: myName, score: 0 }],
       });
@@ -408,9 +466,16 @@ export default function Quiz() {
           isHost: rData.hostName === myName,
         }));
 
+        if (rData.difficulty && rData.difficulty !== difficulty) {
+          setDifficulty(rData.difficulty);
+        }
+
         // Nếu chủ phòng đã bấm bắt đầu và câu hỏi đã sẵn sàng
         if (rData.status === "in_progress" && rData.questions && rData.questions.length > 0) {
           clearInterval(roomPollRef.current);
+          const rDiff = rData.difficulty || difficulty || "medium";
+          const diffCfg = DIFFICULTY_CONFIG[rDiff] || DIFFICULTY_CONFIG.medium;
+          setDifficulty(rDiff);
           setQuestions(rData.questions);
           setCurrentIndex(0);
           setScore(0);
@@ -419,7 +484,7 @@ export default function Quiz() {
           setCorrectCount(0);
           setSelectedOption(null);
           setIsAnswered(false);
-          setTimeLeft(QUESTION_MAX_TIME);
+          setTimeLeft(diffCfg.maxTime);
           gameStartTimeRef.current = Date.now();
           questionStartTimeRef.current = Date.now();
           setGameState("playing");
@@ -462,6 +527,9 @@ export default function Quiz() {
       await quizApi.startRoom(currentRoom.roomCode);
       const updated = await quizApi.getRoom(currentRoom.roomCode);
       if (updated.data.room.questions) {
+        const rDiff = updated.data.room.difficulty || difficulty || "medium";
+        const diffCfg = DIFFICULTY_CONFIG[rDiff] || DIFFICULTY_CONFIG.medium;
+        setDifficulty(rDiff);
         setQuestions(updated.data.room.questions);
         setCurrentIndex(0);
         setScore(0);
@@ -470,7 +538,7 @@ export default function Quiz() {
         setCorrectCount(0);
         setSelectedOption(null);
         setIsAnswered(false);
-        setTimeLeft(QUESTION_MAX_TIME);
+        setTimeLeft(diffCfg.maxTime);
         gameStartTimeRef.current = Date.now();
         questionStartTimeRef.current = Date.now();
         setGameState("playing");
@@ -481,7 +549,8 @@ export default function Quiz() {
   };
 
   const currentQ = questions[currentIndex];
-  const timePercent = Math.max(0, Math.min(100, (timeLeft / QUESTION_MAX_TIME) * 100));
+  const maxAllowedTime = currentDiffCfg.maxTime;
+  const timePercent = Math.max(0, Math.min(100, (timeLeft / maxAllowedTime) * 100));
 
   const optionTheme = [
     { bg: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)", border: "#818cf8" },
@@ -573,7 +642,29 @@ export default function Quiz() {
                   <div className="text-center mb-4">
                     <span className="fs-1">🏆</span>
                     <h2 className="fw-bold text-warning mb-1">BẢNG KỶ LỤC CAO THỦ</h2>
-                    <p className="text-white-50 small">Top những học viên đạt điểm số kỷ lục trong Đấu Trường TOEIC</p>
+                    <p className="text-white-50 small mb-3">Top những học viên đạt điểm số kỷ lục trong Đấu Trường TOEIC</p>
+
+                    {/* BỘ LỌC BẢNG XẾP HẠNG THEO MỨC ĐỘ KHÓ DỄ */}
+                    <div className="d-flex justify-content-center gap-2 flex-wrap">
+                      {[
+                        { key: "all", label: "🌟 Tất Cả" },
+                        { key: "easy", label: "🟢 Dễ (350 - 500)" },
+                        { key: "medium", label: "🟡 Tiêu Chuẩn (550 - 750)" },
+                        { key: "hard", label: "🔥 Khó (800 - 990+)" },
+                      ].map((f) => (
+                        <button
+                          key={f.key}
+                          type="button"
+                          className={`btn btn-sm px-3 py-1.5 rounded-pill fw-bold ${lbDifficulty === f.key ? "btn-warning text-dark" : "btn-outline-light text-white-50"}`}
+                          onClick={() => {
+                            setLbDifficulty(f.key);
+                            fetchLeaderboard(f.key);
+                          }}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* BỤC VINH DANH TOP 1, 2, 3 */}
@@ -626,6 +717,7 @@ export default function Quiz() {
                         <tr className="text-white-50 border-bottom border-white border-opacity-15">
                           <th style={{ width: 60 }}>Hạng</th>
                           <th>Học viên</th>
+                          <th className="text-center">Mức độ</th>
                           <th className="text-center">Số câu đúng</th>
                           <th className="text-center">Chuỗi 🔥</th>
                           <th className="text-center">Thời gian</th>
@@ -643,6 +735,11 @@ export default function Quiz() {
                                 </div>
                                 <span className="fw-semibold text-white">{item.player_name}</span>
                               </div>
+                            </td>
+                            <td className="text-center">
+                              <span className={`badge rounded-pill small ${item.difficulty === "hard" ? "bg-danger" : item.difficulty === "easy" ? "bg-success" : "bg-warning text-dark"}`}>
+                                {item.difficulty === "hard" ? "🔥 Khó" : item.difficulty === "easy" ? "🟢 Dễ" : "🟡 Chuẩn"}
+                              </span>
                             </td>
                             <td className="text-center">
                               <span className="badge bg-white bg-opacity-10 text-white rounded-pill">
@@ -671,7 +768,7 @@ export default function Quiz() {
                 <div className="card quiz-card-dark p-4 p-md-5 text-center">
                   <div className="mb-3">
                     <span className="quiz-glow-pill">
-                      ⚡ THỬ THÁCH ĐẤU ĐƠN: 1.000 ĐIỂM / CÂU
+                      ⚡ THỬ THÁCH ĐẤU ĐƠN: {currentDiffCfg.baseScore.toLocaleString()} ĐIỂM / CÂU
                     </span>
                   </div>
 
@@ -679,8 +776,7 @@ export default function Quiz() {
                     ĐẤU ĐƠN PHÁ KỶ LỤC
                   </h2>
                   <p className="text-white-50 mb-4" style={{ maxWidth: 540, margin: "0 auto", fontSize: "0.95rem" }}>
-                    Mỗi câu hỏi có giá trị <b>1.000 điểm</b>. Thời gian suy nghĩ càng nhanh thì điểm nhận được càng cao!
-                    Hãy chinh phục 10 câu để xác lập kỷ lục mới toàn server.
+                    Mỗi câu hỏi có giá trị tối đa <b>{currentDiffCfg.baseScore.toLocaleString()} điểm</b> ({currentDiffCfg.maxTime}s suy nghĩ). Thời gian suy nghĩ càng nhanh thì điểm nhận được càng cao!
                   </p>
 
                   {/* THẺ VINH DANH NGƯỜI ĐANG NẮM GIỮ KỶ LỤC CAO NHẤT */}
@@ -702,7 +798,7 @@ export default function Quiz() {
                           </div>
                           <div>
                             <div className="text-warning small text-uppercase fw-bold" style={{ letterSpacing: "0.5px" }}>
-                              KỶ LỤC TOÀN SERVER ĐANG THỐNG TRỊ
+                              KỶ LỤC TOÀN SERVER ({currentDiffCfg.label.toUpperCase()}):
                             </div>
                             <div className="fw-bold text-white fs-5">{recordHolder.player_name}</div>
                             <div className="text-white-50 small mt-0.5">
@@ -746,7 +842,45 @@ export default function Quiz() {
                     </div>
                   </div>
 
-                  {/* CHỌN CHỦ ĐỀ CÂU HỎI */}
+                  {/* 1. CHỌN MỨC ĐỘ THỬ THÁCH (KHÓ - TRUNG BÌNH - DỄ) */}
+                  <div className="text-start mb-4" style={{ maxWidth: 480, margin: "0 auto" }}>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <label className="fw-bold text-white small mb-0" style={{ letterSpacing: "0.3px" }}>
+                        ⚡ Chọn Mức Độ Thử Thách:
+                      </label>
+                      <span className="small text-white-50" style={{ fontSize: "0.78rem" }}>
+                        ⏱ {currentDiffCfg.maxTime}s/câu · Max {currentDiffCfg.baseScore.toLocaleString()}đ
+                      </span>
+                    </div>
+
+                    <div className="row g-2">
+                      {Object.values(DIFFICULTY_CONFIG).map((d) => (
+                        <div className="col-4" key={d.key}>
+                          <button
+                            type="button"
+                            className={`quiz-mode-pill ${difficulty === d.key ? "active" : ""}`}
+                            style={difficulty === d.key ? { borderColor: d.themeBorder, boxShadow: `0 8px 20px -4px ${d.color}66` } : {}}
+                            onClick={() => {
+                              setDifficulty(d.key);
+                              fetchRecord(d.key);
+                            }}
+                          >
+                            <span style={{ fontSize: "1.1rem" }}>{d.key === "easy" ? "🟢" : d.key === "hard" ? "🔥" : "🟡"}</span>
+                            <div className="text-start" style={{ lineHeight: 1.15 }}>
+                              <div className="fw-bold">{d.label}</div>
+                              <div className="text-white-50" style={{ fontSize: "0.68rem" }}>{d.subLabel}</div>
+                            </div>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-2 text-white-50 small" style={{ fontSize: "0.78rem" }}>
+                      ℹ️ {currentDiffCfg.description}
+                    </div>
+                  </div>
+
+                  {/* 2. CHỌN CHỦ ĐỀ CÂU HỎI */}
                   <div className="text-start mb-4" style={{ maxWidth: 480, margin: "0 auto" }}>
                     <label className="fw-bold text-white small mb-2 d-block" style={{ letterSpacing: "0.3px" }}>
                       Chọn Chủ Đề Câu Hỏi:
@@ -790,7 +924,7 @@ export default function Quiz() {
                     <div className="d-flex align-items-start gap-2">
                       <span className="fs-5">💡</span>
                       <div>
-                        <b>Quy tắc tính điểm tốc độ:</b> Mỗi câu tối đa <b>1.000 điểm</b>. Trả lời càng nhanh càng ít bị trừ điểm thời gian. Đúng liên tiếp được cộng thêm điểm chuỗi combo!
+                        <b>Quy tắc tính điểm {currentDiffCfg.label}:</b> Mỗi câu tối đa <b>{currentDiffCfg.baseScore.toLocaleString()} điểm</b> (thời gian tối đa {currentDiffCfg.maxTime}s). Trả lời càng nhanh càng ít bị trừ điểm thời gian. Đúng liên tiếp được cộng thêm điểm chuỗi combo!
                       </div>
                     </div>
                   </div>
@@ -839,9 +973,27 @@ export default function Quiz() {
                               <span className="fs-2">👑</span>
                             </div>
                             <h4 className="fw-bold text-white mb-2">Tạo Phòng Mới</h4>
-                            <p className="text-white-50 small mb-4">
+                            <p className="text-white-50 small mb-3">
                               Tạo phòng với mã PIN 6 số và mời từ 2 - 3 bạn bè cùng tham gia so tài phản xạ.
                             </p>
+
+                            {/* CHỌN MỨC ĐỘ THI ĐẤU CỦA PHÒNG */}
+                            <div className="mb-3 text-start">
+                              <label className="text-white small fw-bold mb-1.5 d-block">Mức Độ Thi Đấu Của Phòng:</label>
+                              <div className="row g-1">
+                                {Object.values(DIFFICULTY_CONFIG).map((d) => (
+                                  <div className="col-4" key={d.key}>
+                                    <button
+                                      type="button"
+                                      className={`btn btn-sm w-100 py-1.5 rounded-3 fw-bold small ${difficulty === d.key ? "btn-warning text-dark" : "btn-outline-light text-white-50"}`}
+                                      onClick={() => setDifficulty(d.key)}
+                                    >
+                                      {d.key === "easy" ? "🟢 Dễ (20s)" : d.key === "hard" ? "🔥 Khó (10s)" : "🟡 Chuẩn (15s)"}
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           </div>
                           <button
                             className="quiz-cta-btn w-100 py-3"
@@ -894,7 +1046,12 @@ export default function Quiz() {
                   {roomState === "waiting" && currentRoom && (
                     <div className="text-center">
                       <div className="p-4 rounded-4 mb-4" style={{ background: "linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%)", border: "1.5px solid #f59e0b", boxShadow: "0 10px 25px -5px rgba(245, 158, 11, 0.2)" }}>
-                        <div className="text-warning small text-uppercase fw-bold" style={{ letterSpacing: "1px" }}>MÃ PIN PHÒNG THÁCH ĐẤU</div>
+                        <div className="d-flex justify-content-center align-items-center gap-2 mb-1 flex-wrap">
+                          <span className="text-warning small text-uppercase fw-bold" style={{ letterSpacing: "1px" }}>MÃ PIN PHÒNG THÁCH ĐẤU</span>
+                          <span className="badge rounded-pill fw-bold" style={{ background: (DIFFICULTY_CONFIG[currentRoom.difficulty || "medium"] || DIFFICULTY_CONFIG.medium).color }}>
+                            {(DIFFICULTY_CONFIG[currentRoom.difficulty || "medium"] || DIFFICULTY_CONFIG.medium).badge}
+                          </span>
+                        </div>
                         <h1 className="fw-bold display-3 text-warning my-2" style={{ letterSpacing: "6px", fontFamily: "monospace", textShadow: "0 0 25px rgba(245, 158, 11, 0.5)" }}>
                           {currentRoom.roomCode}
                         </h1>
@@ -979,10 +1136,13 @@ export default function Quiz() {
             <div className="row justify-content-center">
               <div className="col-lg-9 col-md-11">
                 {/* THANH ĐIỂM SỐ, THỜI GIAN & CHUỖI */}
-                <div className="d-flex justify-content-between align-items-center mb-2.5 text-white">
-                  <div className="d-flex align-items-center gap-2">
+                <div className="d-flex justify-content-between align-items-center mb-2.5 text-white flex-wrap gap-2">
+                  <div className="d-flex align-items-center gap-2 flex-wrap">
                     <span className="badge bg-primary px-3 py-1.5 rounded-pill fw-bold">
                       Câu {currentIndex + 1} / {questions.length}
+                    </span>
+                    <span className="badge rounded-pill fw-bold" style={{ background: currentDiffCfg.color }}>
+                      {currentDiffCfg.badge}
                     </span>
                     <span className="badge bg-secondary-subtle text-white px-2.5 py-1.5 rounded-pill small">
                       {currentQ.badge}
@@ -991,17 +1151,17 @@ export default function Quiz() {
 
                   {streak >= 2 && (
                     <div className="badge bg-danger px-3 py-1.5 rounded-pill fw-bold">
-                      🔥 Chuỗi x{streak} (+{streak >= 5 ? 200 : streak >= 3 ? 100 : 50}đ)
+                      🔥 Chuỗi x{streak} (+{currentDiffCfg.streakBonus(streak)}đ)
                     </div>
                   )}
 
-                  <div className="text-end">
+                  <div className="text-end ms-auto">
                     <span className="text-white-50 small">Điểm tích lũy: </span>
                     <b className="fs-5 text-warning">{score.toLocaleString()} đ</b>
                   </div>
                 </div>
 
-                {/* THANH ĐẾM NGƯỢC 15s */}
+                {/* THANH ĐẾM NGƯỢC */}
                 <div className="d-flex align-items-center gap-2 mb-3">
                   <div className="progress flex-grow-1 rounded-pill" style={{ height: 12, background: "rgba(255,255,255,0.15)" }}>
                     <div
@@ -1009,11 +1169,11 @@ export default function Quiz() {
                       style={{
                         width: `${timePercent}%`,
                         transition: "width 1s linear",
-                        background: timeLeft <= 4 ? "#ef4444" : timeLeft <= 8 ? "#f59e0b" : "#3b82f6",
+                        background: timeLeft <= 3 ? "#ef4444" : timeLeft <= 6 ? "#f59e0b" : "#3b82f6",
                       }}
                     ></div>
                   </div>
-                  <span className="fw-bold small text-white text-nowrap">⏱ {timeLeft}s</span>
+                  <span className="fw-bold small text-white text-nowrap">⏱ {timeLeft}s / {maxAllowedTime}s</span>
                 </div>
 
                 {/* KHUNG CÂU HỎI */}
@@ -1099,7 +1259,9 @@ export default function Quiz() {
                     <div className="flex-grow-1 text-white">
                       <div className="fw-bold mb-1">
                         {selectedOption === currentQ.correctKey ? (
-                          <span className="text-success">🎉 Chính xác! (+{Math.max(100, 1000 - Math.round(((QUESTION_MAX_TIME - timeLeft) * 55)))} điểm)</span>
+                          <span className="text-success">
+                            🎉 Chính xác! (+{Math.max(100, currentDiffCfg.baseScore - Math.round(((maxAllowedTime - timeLeft) * currentDiffCfg.timeDeductionPerSec)))} điểm)
+                          </span>
                         ) : selectedOption === "__TIMEOUT__" ? (
                           <span className="text-warning">⏰ Đã hết thời gian (0 điểm)</span>
                         ) : (
@@ -1129,19 +1291,24 @@ export default function Quiz() {
                     <div className="mb-3">
                       <span className="fs-1 d-block mb-1">👑</span>
                       <h2 className="fw-bold text-warning mb-1">KỶ LỤC MỚI ĐÃ ĐƯỢC XÁC LẬP!</h2>
-                      <p className="text-white-50 small">Chúc mừng bạn đã xuất sắc vượt qua kỷ lục điểm số toàn hệ thống!</p>
+                      <p className="text-white-50 small">Chúc mừng bạn đã xuất sắc vượt qua kỷ lục điểm số mức độ {currentDiffCfg.label}!</p>
                     </div>
                   ) : (
                     <div className="mb-3">
                       <span className="fs-1 d-block mb-1">🎉</span>
                       <h2 className="fw-bold text-warning mb-1">HOÀN THÀNH TRẬN ĐẤU!</h2>
-                      <p className="text-white-50 small">Bạn đã hoàn thành 10 câu hỏi thử thách phản xạ tốc độ</p>
+                      <p className="text-white-50 small">Bạn đã hoàn thành 10 câu hỏi thử thách phản xạ tốc độ ({currentDiffCfg.label})</p>
                     </div>
                   )}
 
                   {/* THẺ TỔNG ĐIỂM */}
                   <div className="p-4 rounded-4 mb-4" style={{ background: "linear-gradient(135deg, rgba(79, 70, 229, 0.3) 0%, rgba(245, 158, 11, 0.25) 100%)", border: "2px solid #f59e0b" }}>
-                    <div className="text-white-50 small text-uppercase fw-semibold mb-1">TỔNG ĐIỂM GHI ĐƯỢC</div>
+                    <div className="d-flex justify-content-center align-items-center gap-2 mb-1 flex-wrap">
+                      <span className="text-white-50 small text-uppercase fw-semibold">TỔNG ĐIỂM GHI ĐƯỢC</span>
+                      <span className="badge rounded-pill fw-bold" style={{ background: currentDiffCfg.color }}>
+                        {currentDiffCfg.badge}
+                      </span>
+                    </div>
                     <h1 className="fw-bold display-3 text-warning mb-2">{score.toLocaleString()}</h1>
                     <div className="d-flex justify-content-center gap-3 text-white small flex-wrap">
                       <span>🎯 Đúng: <b>{correctCount}/10 câu</b></span>

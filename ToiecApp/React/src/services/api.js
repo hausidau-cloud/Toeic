@@ -57,7 +57,7 @@ export const grammarApi = {
 
 export const quizApi = {
   getQuestions: (params = {}) => api.get("/quiz/questions", { params }),
-  getRecord: () => api.get("/quiz/record"),
+  getRecord: (params = {}) => api.get("/quiz/record", { params }),
   submitScore: (data) => api.post("/quiz/submit", data),
   getLeaderboard: (params = {}) => api.get("/quiz/leaderboard", { params }),
   createRoom: (data) => api.post("/quiz/room/create", data),
