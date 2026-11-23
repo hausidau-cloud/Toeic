@@ -82,18 +82,30 @@ export default function Navbar() {
             </Link>
           </div>
 
-          <div className="d-flex gap-2 align-items-center flex-nowrap pt-2 pt-lg-0 ms-lg-2">
+          {/* DESKTOP USER SECTION (Màn hình máy tính >= 992px) */}
+          <div className="d-none d-lg-flex gap-2 align-items-center flex-nowrap ms-lg-2">
             {user ? (
               <>
                 {/* User chip */}
-                <div className="d-flex align-items-center gap-2 bg-white bg-opacity-10 border border-white border-opacity-15 px-3 py-1.5 rounded-pill" title={`${user.fullName || user.email} (${user.role === "Admin" ? "Quản trị viên" : "Học viên"})`}>
+                <div
+                  className="d-flex align-items-center gap-2 bg-white bg-opacity-10 border border-white border-opacity-15 px-3 py-1.5 rounded-pill"
+                  title={`${user.fullName || user.email} (${user.role === "Admin" ? "Quản trị viên" : "Học viên"})`}
+                >
                   <div className={`user-avatar-circle ${user.role === "Admin" ? "admin" : ""}`}>
                     {((user.fullName || user.email || "H")[0]).toUpperCase()}
                   </div>
-                  <span className="fw-semibold text-white small" style={{ maxWidth: 150, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <span
+                    className="fw-semibold text-white small"
+                    style={{ maxWidth: 150, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                  >
                     {user.fullName || user.email}
                   </span>
-                  <span className={`badge rounded-pill px-2 py-0.5 ${user.role === "Admin" ? "bg-warning text-dark fw-bold" : "bg-primary text-white"}`} style={{ fontSize: "0.68rem" }}>
+                  <span
+                    className={`badge rounded-pill px-2 py-0.5 ${
+                      user.role === "Admin" ? "bg-warning text-dark fw-bold" : "bg-primary text-white"
+                    }`}
+                    style={{ fontSize: "0.68rem" }}
+                  >
                     {user.role === "Admin" ? "Admin" : "Học viên"}
                   </span>
                 </div>
@@ -103,7 +115,6 @@ export default function Navbar() {
                   <Link
                     to="/admin"
                     className="btn btn-warning btn-sm px-2.5 py-1.5 rounded-pill fw-bold text-nowrap"
-                    onClick={() => setIsOpen(false)}
                     title="Trang quản trị hệ thống"
                   >
                     ⚙️ Quản trị
@@ -114,7 +125,6 @@ export default function Navbar() {
                 <Link
                   to="/dashboard"
                   className="btn btn-primary btn-sm px-3 py-1.5 rounded-pill d-flex align-items-center gap-1.5 fw-semibold text-nowrap shadow-sm"
-                  onClick={() => setIsOpen(false)}
                   title="Góc học tập cá nhân"
                 >
                   <span>📊</span>
@@ -131,22 +141,91 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link
-                  to="/login"
-                  className="btn btn-outline-light btn-sm px-3 py-1.5 rounded-pill"
-                  onClick={() => setIsOpen(false)}
-                >
+                <Link to="/login" className="btn btn-outline-light btn-sm px-3 py-1.5 rounded-pill">
                   Đăng nhập
                 </Link>
 
-                <Link
-                  to="/register"
-                  className="btn btn-warning btn-sm px-3 py-1.5 rounded-pill fw-bold"
-                  onClick={() => setIsOpen(false)}
-                >
+                <Link to="/register" className="btn btn-warning btn-sm px-3 py-1.5 rounded-pill fw-bold">
                   Đăng ký
                 </Link>
               </>
+            )}
+          </div>
+
+          {/* MOBILE USER SECTION (Màn hình điện thoại/tablet < 992px) */}
+          <div className="d-lg-none border-top border-white border-opacity-15 pt-3 mt-2 pb-2">
+            {user ? (
+              <div className="bg-white bg-opacity-10 rounded-4 p-3 border border-white border-opacity-15">
+                <div className="d-flex align-items-center gap-2.5 mb-3">
+                  <div className={`user-avatar-circle ${user.role === "Admin" ? "admin" : ""}`}>
+                    {((user.fullName || user.email || "H")[0]).toUpperCase()}
+                  </div>
+                  <div className="flex-grow-1 overflow-hidden">
+                    <div className="fw-bold text-white small text-truncate">
+                      {user.fullName || user.email}
+                    </div>
+                    <div className="text-white-50 small" style={{ fontSize: "0.75rem" }}>
+                      ● {user.role === "Admin" ? "Quản trị viên" : "Học viên trực tuyến"}
+                    </div>
+                  </div>
+                  <span
+                    className={`badge rounded-pill px-2.5 py-1 ${
+                      user.role === "Admin" ? "bg-warning text-dark fw-bold" : "bg-primary text-white"
+                    }`}
+                  >
+                    {user.role === "Admin" ? "👑 Admin" : "🎓 Học viên"}
+                  </span>
+                </div>
+
+                <div className="d-grid gap-2">
+                  {user.role === "Admin" && (
+                    <Link
+                      to="/admin"
+                      className="btn btn-warning btn-sm fw-bold rounded-pill py-2"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      ⚙️ Quản Trị Hệ Thống
+                    </Link>
+                  )}
+                  <Link
+                    to="/dashboard"
+                    className="btn btn-primary btn-sm fw-bold rounded-pill py-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    📊 {user.role === "Admin" ? "Dashboard Quản Trị" : "Góc Học Tập Của Bạn"}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      handleLogout();
+                    }}
+                    className="btn btn-outline-danger btn-sm text-white border-white border-opacity-25 rounded-pill py-2"
+                  >
+                    🚪 Đăng Xuất
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="row g-2">
+                <div className="col-6">
+                  <Link
+                    to="/login"
+                    className="btn btn-outline-light w-100 py-2 rounded-pill fw-semibold"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Đăng nhập
+                  </Link>
+                </div>
+                <div className="col-6">
+                  <Link
+                    to="/register"
+                    className="btn btn-warning w-100 py-2 rounded-pill fw-bold"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Đăng ký
+                  </Link>
+                </div>
+              </div>
             )}
           </div>
         </div>
