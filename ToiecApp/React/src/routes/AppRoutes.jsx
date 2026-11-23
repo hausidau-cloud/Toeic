@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 
 import Home from "../pages/Home";
 import Login from "../pages/Login";
@@ -14,7 +14,7 @@ import Admin from "../pages/Admin";
 
 export default function AppRoutes() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Home />} />
 
@@ -30,6 +30,6 @@ export default function AppRoutes() {
 
         <Route path="/admin" element={<Admin />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
