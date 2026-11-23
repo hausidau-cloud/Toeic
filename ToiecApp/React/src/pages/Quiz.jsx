@@ -497,52 +497,66 @@ export default function Quiz() {
       <main className="quiz-arena-shell flex-grow-1">
         <div className="container">
           {/* HEADER CHÍNH CỦA ĐẤU TRƯỜNG */}
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 border-bottom border-white border-opacity-10 pb-3">
-            <div className="d-flex align-items-center gap-2.5">
-              <span className="fs-2">🎮</span>
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 pb-3 border-bottom border-white border-opacity-10">
+            <div className="d-flex align-items-center gap-3">
+              <div
+                className="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                style={{
+                  width: 48,
+                  height: 48,
+                  background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                  boxShadow: "0 0 20px rgba(99, 102, 241, 0.4)",
+                }}
+              >
+                <span className="fs-3">🎮</span>
+              </div>
               <div>
-                <h3 className="fw-bold text-white mb-0">Đấu Trường TOEIC Quiz</h3>
+                <h3 className="fw-bold text-white mb-0" style={{ letterSpacing: "-0.5px" }}>
+                  Đấu Trường <span style={{ color: "#fbbf24" }}>TOEIC Quiz</span>
+                </h3>
                 <p className="text-white-50 small mb-0">1.000 điểm mỗi câu · Phản xạ thần tốc · Thách đấu phá kỷ lục</p>
               </div>
             </div>
 
             <div className="d-flex gap-2 align-items-center flex-wrap">
-              <button
-                className={`btn btn-sm px-3 py-1.5 rounded-pill fw-semibold ${activeTab === "solo" ? "btn-warning text-dark fw-bold" : "btn-outline-light text-white"}`}
-                onClick={() => {
-                  setActiveTab("solo");
-                  setGameState("lobby");
-                }}
-              >
-                👤 Đấu Đơn Phá Kỷ Lục
-              </button>
+              <div className="quiz-nav-capsule">
+                <button
+                  className={`quiz-tab-btn ${activeTab === "solo" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("solo");
+                    setGameState("lobby");
+                  }}
+                >
+                  👤 Đấu Đơn
+                </button>
+
+                <button
+                  className={`quiz-tab-btn ${activeTab === "room" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("room");
+                    setGameState("lobby");
+                    setRoomState("menu");
+                  }}
+                >
+                  ⚔️ Thách Đấu
+                </button>
+
+                <button
+                  className={`quiz-tab-btn ${activeTab === "leaderboard" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("leaderboard");
+                    fetchLeaderboard();
+                  }}
+                >
+                  🏆 Bảng Kỷ Lục
+                </button>
+              </div>
 
               <button
-                className={`btn btn-sm px-3 py-1.5 rounded-pill fw-semibold ${activeTab === "room" ? "btn-warning text-dark fw-bold" : "btn-outline-light text-white"}`}
-                onClick={() => {
-                  setActiveTab("room");
-                  setGameState("lobby");
-                  setRoomState("menu");
-                }}
-              >
-                ⚔️ Thách Đấu (2-3+ Người)
-              </button>
-
-              <button
-                className={`btn btn-sm px-3 py-1.5 rounded-pill fw-semibold ${activeTab === "leaderboard" ? "btn-warning text-dark fw-bold" : "btn-outline-light text-white"}`}
-                onClick={() => {
-                  setActiveTab("leaderboard");
-                  fetchLeaderboard();
-                }}
-              >
-                🏆 Bảng Kỷ Lục
-              </button>
-
-              <button
-                className="btn btn-sm btn-outline-light rounded-circle p-1.5 text-white"
+                className="btn btn-sm btn-outline-light rounded-circle p-1.5 text-white shadow-sm"
                 onClick={toggleSound}
                 title={soundOn ? "Tắt âm thanh" : "Bật âm thanh"}
-                style={{ width: 34, height: 34 }}
+                style={{ width: 38, height: 38, display: "inline-flex", alignItems: "center", justifyContent: "center" }}
               >
                 {soundOn ? "🔊" : "🔇"}
               </button>
@@ -654,111 +668,143 @@ export default function Quiz() {
           {activeTab === "solo" && gameState === "lobby" && (
             <div className="row justify-content-center">
               <div className="col-lg-8 col-md-10">
-                <div className="card quiz-card-dark rounded-4 p-4 p-md-5 text-center">
+                <div className="card quiz-card-dark p-4 p-md-5 text-center">
                   <div className="mb-3">
-                    <span className="badge bg-warning bg-opacity-20 text-warning border border-warning px-3 py-1.5 rounded-pill fw-bold">
+                    <span className="quiz-glow-pill">
                       ⚡ THỬ THÁCH ĐẤU ĐƠN: 1.000 ĐIỂM / CÂU
                     </span>
                   </div>
 
-                  <h2 className="fw-bold display-6 text-white mb-2">ĐẤU ĐƠN PHÁ KỶ LỤC</h2>
-                  <p className="text-white-50 mb-4 fs-6" style={{ maxWidth: 560, margin: "0 auto" }}>
+                  <h2 className="fw-bold display-6 text-white mb-2" style={{ letterSpacing: "-0.5px" }}>
+                    ĐẤU ĐƠN PHÁ KỶ LỤC
+                  </h2>
+                  <p className="text-white-50 mb-4" style={{ maxWidth: 540, margin: "0 auto", fontSize: "0.95rem" }}>
                     Mỗi câu hỏi có giá trị <b>1.000 điểm</b>. Thời gian suy nghĩ càng nhanh thì điểm nhận được càng cao!
                     Hãy chinh phục 10 câu để xác lập kỷ lục mới toàn server.
                   </p>
 
                   {/* THẺ VINH DANH NGƯỜI ĐANG NẮM GIỮ KỶ LỤC CAO NHẤT */}
                   {recordHolder && recordHolder.score > 0 && (
-                    <div className="quiz-record-banner p-3.5 rounded-4 mb-4 text-start">
-                      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div className="quiz-record-banner p-3.5 p-md-4 mb-4 text-start">
+                      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div className="d-flex align-items-center gap-3">
-                          <span className="fs-1">👑</span>
+                          <div
+                            className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                            style={{
+                              width: 52,
+                              height: 52,
+                              background: "linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(217, 119, 6, 0.45))",
+                              border: "1.5px solid #fbbf24",
+                              boxShadow: "0 0 20px rgba(245, 158, 11, 0.45)",
+                            }}
+                          >
+                            <span className="fs-2">👑</span>
+                          </div>
                           <div>
-                            <div className="text-warning small text-uppercase fw-bold">KỶ LỤC TOÀN SERVER ĐANG THỐNG TRỊ:</div>
+                            <div className="text-warning small text-uppercase fw-bold" style={{ letterSpacing: "0.5px" }}>
+                              KỶ LỤC TOÀN SERVER ĐANG THỐNG TRỊ
+                            </div>
                             <div className="fw-bold text-white fs-5">{recordHolder.player_name}</div>
-                            <div className="text-white-50 small">
-                              Đúng: {recordHolder.correct_count}/{recordHolder.total_questions} câu · Thời gian: {recordHolder.time_spent}s
+                            <div className="text-white-50 small mt-0.5">
+                              🎯 Đúng: <b className="text-white">{recordHolder.correct_count}/{recordHolder.total_questions}</b> câu · ⏱ Thời gian: <b className="text-white">{recordHolder.time_spent}s</b>
                             </div>
                           </div>
                         </div>
 
-                        <div className="text-end">
-                          <div className="text-white-50 small">Điểm Kỷ Lục</div>
-                          <h3 className="fw-bold text-warning mb-0">{recordHolder.score.toLocaleString()} đ</h3>
+                        <div className="text-end ms-auto ms-sm-0">
+                          <div className="text-white-50 small text-uppercase fw-semibold" style={{ fontSize: "0.75rem" }}>Điểm Kỷ Lục</div>
+                          <div className="quiz-record-score">{recordHolder.score.toLocaleString()} đ</div>
                         </div>
                       </div>
                     </div>
                   )}
 
                   {/* THẺ HỌC VIÊN HIỆN TẠI */}
-                  <div className="p-3 rounded-4 mb-4 mx-auto text-start" style={{ maxWidth: 460, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div className="d-flex align-items-center gap-2.5">
-                        <div className="user-avatar-circle" style={{ width: 38, height: 38 }}>
+                  <div className="quiz-user-card mb-4 mx-auto text-start" style={{ maxWidth: 480 }}>
+                    <div className="d-flex align-items-center justify-content-between gap-3">
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="user-avatar-circle" style={{ width: 42, height: 42, fontSize: "1.1rem" }}>
                           {(myName[0] || "H").toUpperCase()}
                         </div>
                         <div>
-                          <div className="fw-bold text-white">{myName}</div>
+                          <div className="fw-bold text-white fs-6">{myName}</div>
                           <div className="text-white-50 small">
                             {user ? `Học viên: ${user.email}` : "Chơi ở chế độ khách (Chưa đăng nhập)"}
                           </div>
                         </div>
                       </div>
 
-                      {!user && (
-                        <Link to="/login?redirect=/quiz" className="btn btn-warning btn-sm fw-bold rounded-pill px-3">
+                      {!user ? (
+                        <Link to="/login?redirect=/quiz" className="btn btn-warning btn-sm fw-bold rounded-pill px-3 shadow-sm text-dark">
                           Đăng nhập
                         </Link>
+                      ) : (
+                        <span className="badge bg-success bg-opacity-20 text-success border border-success rounded-pill px-2.5 py-1 small">
+                          ● Đã sẵn sàng
+                        </span>
                       )}
                     </div>
                   </div>
 
-                  {/* CHỌN CHỦ ĐỀ */}
-                  <div className="text-start mb-4" style={{ maxWidth: 460, margin: "0 auto" }}>
-                    <label className="fw-bold text-white small mb-2 d-block">Chọn Chế Độ Câu Hỏi:</label>
+                  {/* CHỌN CHỦ ĐỀ CÂU HỎI */}
+                  <div className="text-start mb-4" style={{ maxWidth: 480, margin: "0 auto" }}>
+                    <label className="fw-bold text-white small mb-2 d-block" style={{ letterSpacing: "0.3px" }}>
+                      Chọn Chủ Đề Câu Hỏi:
+                    </label>
                     <div className="row g-2">
                       <div className="col-4">
                         <button
                           type="button"
-                          className={`btn w-100 py-2 rounded-3 fw-bold small ${quizMode === "all" ? "btn-primary" : "btn-outline-light text-white"}`}
+                          className={`quiz-mode-pill ${quizMode === "all" ? "active" : ""}`}
                           onClick={() => setQuizMode("all")}
                         >
-                          🌟 Tổng Hợp
+                          <span>🌟</span>
+                          <span>Tổng Hợp</span>
                         </button>
                       </div>
                       <div className="col-4">
                         <button
                           type="button"
-                          className={`btn w-100 py-2 rounded-3 fw-bold small ${quizMode === "vocab" ? "btn-primary" : "btn-outline-light text-white"}`}
+                          className={`quiz-mode-pill ${quizMode === "vocab" ? "active" : ""}`}
                           onClick={() => setQuizMode("vocab")}
                         >
-                          🧠 Từ Vựng
+                          <span>🧠</span>
+                          <span>Từ Vựng</span>
                         </button>
                       </div>
                       <div className="col-4">
                         <button
                           type="button"
-                          className={`btn w-100 py-2 rounded-3 fw-bold small ${quizMode === "grammar" ? "btn-primary" : "btn-outline-light text-white"}`}
+                          className={`quiz-mode-pill ${quizMode === "grammar" ? "active" : ""}`}
                           onClick={() => setQuizMode("grammar")}
                         >
-                          📖 Ngữ Pháp
+                          <span>📖</span>
+                          <span>Ngữ Pháp</span>
                         </button>
                       </div>
                     </div>
                   </div>
 
                   {/* CÔNG THỨC TÍNH ĐIỂM RÕ RÀNG */}
-                  <div className="p-2.5 rounded-3 mb-4 small text-white-50 mx-auto" style={{ maxWidth: 460, background: "rgba(0,0,0,0.25)" }}>
-                    💡 <b>Quy tắc tính điểm:</b> Mỗi câu có tối đa <b>1.000 điểm</b>. Trả lời càng nhanh càng ít bị trừ điểm thời gian. Đúng liên tiếp được cộng thêm điểm chuỗi combo!
+                  <div className="quiz-explainer-box mb-4 mx-auto text-start" style={{ maxWidth: 480 }}>
+                    <div className="d-flex align-items-start gap-2">
+                      <span className="fs-5">💡</span>
+                      <div>
+                        <b>Quy tắc tính điểm tốc độ:</b> Mỗi câu tối đa <b>1.000 điểm</b>. Trả lời càng nhanh càng ít bị trừ điểm thời gian. Đúng liên tiếp được cộng thêm điểm chuỗi combo!
+                      </div>
+                    </div>
                   </div>
 
-                  <button
-                    className="btn btn-warning btn-lg px-5 py-3 rounded-pill fw-bold shadow-lg text-dark"
-                    onClick={startSoloGame}
-                    disabled={loadingQuestions}
-                  >
-                    {loadingQuestions ? "Đang chuẩn bị đề thi..." : "🚀 VÀO THI ĐẤU PHÁ KỶ LỤC"}
-                  </button>
+                  <div>
+                    <button
+                      className="quiz-cta-btn"
+                      onClick={startSoloGame}
+                      disabled={loadingQuestions}
+                    >
+                      <span>🚀</span>
+                      <span>{loadingQuestions ? "Đang chuẩn bị đề thi..." : "VÀO THI ĐẤU PHÁ KỶ LỤC"}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -770,13 +816,15 @@ export default function Quiz() {
           {activeTab === "room" && gameState === "lobby" && (
             <div className="row justify-content-center">
               <div className="col-lg-8 col-md-10">
-                <div className="card quiz-card-dark rounded-4 p-4 p-md-5">
+                <div className="card quiz-card-dark p-4 p-md-5">
                   <div className="text-center mb-4">
-                    <span className="badge bg-danger bg-opacity-20 text-danger border border-danger px-3 py-1.5 rounded-pill fw-bold mb-2">
-                      ⚔️ CHẾ ĐỘ THÁCH ĐẤU ĐỐI ĐẦU
-                    </span>
-                    <h2 className="fw-bold text-white mb-1">PHÒNG THÁCH ĐẤU TRỰC TIẾP</h2>
-                    <p className="text-white-50 small mb-0">
+                    <div className="mb-3">
+                      <span className="quiz-glow-pill" style={{ borderColor: "rgba(239, 68, 68, 0.6)", background: "linear-gradient(90deg, rgba(239, 68, 68, 0.15), rgba(245, 158, 11, 0.15))", color: "#f87171" }}>
+                        ⚔️ CHẾ ĐỘ THÁCH ĐẤU ĐỐI ĐẦU
+                      </span>
+                    </div>
+                    <h2 className="fw-bold text-white mb-2" style={{ letterSpacing: "-0.5px" }}>PHÒNG THÁCH ĐẤU TRỰC TIẾP</h2>
+                    <p className="text-white-50 small mb-0" style={{ maxWidth: 500, margin: "0 auto" }}>
                       Yêu cầu <b>từ 2 đến 3 người chơi trở lên</b> cùng tham gia giải chung 1 bộ đề để tranh chức vô địch!
                     </p>
                   </div>
@@ -785,29 +833,35 @@ export default function Quiz() {
                     <div className="row g-4 justify-content-center">
                       {/* TẠO PHÒNG MỚI */}
                       <div className="col-md-6">
-                        <div className="p-4 rounded-4 text-center h-100 d-flex flex-column justify-content-between" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                        <div className="p-4 rounded-4 text-center h-100 d-flex flex-column justify-content-between" style={{ background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(255,255,255,0.12)", transition: "all 0.25s ease" }}>
                           <div>
-                            <span className="fs-1 d-block mb-2">👑</span>
+                            <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 56, height: 56, background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.4)" }}>
+                              <span className="fs-2">👑</span>
+                            </div>
                             <h4 className="fw-bold text-white mb-2">Tạo Phòng Mới</h4>
-                            <p className="text-white-50 small mb-3">
+                            <p className="text-white-50 small mb-4">
                               Tạo phòng với mã PIN 6 số và mời từ 2 - 3 bạn bè cùng tham gia so tài phản xạ.
                             </p>
                           </div>
                           <button
-                            className="btn btn-warning w-100 py-2.5 rounded-pill fw-bold text-dark"
+                            className="quiz-cta-btn w-100 py-3"
+                            style={{ fontSize: "1rem" }}
                             onClick={createNewRoom}
                             disabled={roomLoading}
                           >
-                            {roomLoading ? "Đang tạo phòng..." : "Tạo Phòng Thi Đấu"}
+                            <span>👑</span>
+                            <span>{roomLoading ? "Đang tạo phòng..." : "Tạo Phòng Thi Đấu"}</span>
                           </button>
                         </div>
                       </div>
 
                       {/* VÀO PHÒNG BẰNG MÃ PIN */}
                       <div className="col-md-6">
-                        <div className="p-4 rounded-4 text-center h-100 d-flex flex-column justify-content-between" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                        <div className="p-4 rounded-4 text-center h-100 d-flex flex-column justify-content-between" style={{ background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(255,255,255,0.12)", transition: "all 0.25s ease" }}>
                           <div>
-                            <span className="fs-1 d-block mb-2">🔑</span>
+                            <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 56, height: 56, background: "rgba(59, 130, 246, 0.15)", border: "1px solid rgba(59, 130, 246, 0.4)" }}>
+                              <span className="fs-2">🔑</span>
+                            </div>
                             <h4 className="fw-bold text-white mb-2">Vào Phòng</h4>
                             <p className="text-white-50 small mb-3">
                               Nhập mã PIN 6 số do bạn bè gửi để vào phòng thách đấu.
@@ -816,17 +870,20 @@ export default function Quiz() {
                               type="text"
                               maxLength={6}
                               placeholder="Nhập mã PIN (VD: 849201)"
-                              className="form-control text-center fw-bold fs-5 mb-3 bg-dark text-warning border-secondary"
+                              className="form-control text-center fw-bold fs-4 mb-3 bg-dark text-warning border-secondary"
+                              style={{ letterSpacing: "4px", borderRadius: 14 }}
                               value={roomCodeInput}
                               onChange={(e) => setRoomCodeInput(e.target.value)}
                             />
                           </div>
                           <button
-                            className="btn btn-primary w-100 py-2.5 rounded-pill fw-bold"
+                            className="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-lg"
+                            style={{ background: "linear-gradient(135deg, #4f46e5 0%, #2563eb 100%)", border: 0, fontSize: "1rem" }}
                             onClick={() => joinExistingRoom()}
                             disabled={roomLoading}
                           >
-                            {roomLoading ? "Đang vào..." : "Tham Gia Phòng"}
+                            <span>🔑</span>
+                            <span className="ms-2">{roomLoading ? "Đang vào..." : "Tham Gia Phòng"}</span>
                           </button>
                         </div>
                       </div>
@@ -836,9 +893,11 @@ export default function Quiz() {
                   {/* PHÒNG CHỜ (WAITING ROOM) */}
                   {roomState === "waiting" && currentRoom && (
                     <div className="text-center">
-                      <div className="p-3 rounded-4 mb-4" style={{ background: "rgba(245, 158, 11, 0.15)", border: "1px solid #f59e0b" }}>
-                        <div className="text-warning small text-uppercase fw-bold">MÃ PIN PHÒNG THÁCH ĐẤU:</div>
-                        <h1 className="fw-bold display-4 text-warning letter-spacing-2 mb-1">{currentRoom.roomCode}</h1>
+                      <div className="p-4 rounded-4 mb-4" style={{ background: "linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%)", border: "1.5px solid #f59e0b", boxShadow: "0 10px 25px -5px rgba(245, 158, 11, 0.2)" }}>
+                        <div className="text-warning small text-uppercase fw-bold" style={{ letterSpacing: "1px" }}>MÃ PIN PHÒNG THÁCH ĐẤU</div>
+                        <h1 className="fw-bold display-3 text-warning my-2" style={{ letterSpacing: "6px", fontFamily: "monospace", textShadow: "0 0 25px rgba(245, 158, 11, 0.5)" }}>
+                          {currentRoom.roomCode}
+                        </h1>
                         <p className="text-white-50 small mb-0">Chia sẻ mã PIN này cho bạn bè để cùng vào phòng!</p>
                       </div>
 
@@ -856,7 +915,7 @@ export default function Quiz() {
                           {currentRoom.players?.map((p, idx) => (
                             <div className="col-12 col-sm-6" key={idx}>
                               <div className="p-2.5 rounded-3 d-flex align-items-center gap-2.5" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                                <div className="user-avatar-circle" style={{ width: 32, height: 32, fontSize: "0.85rem" }}>
+                                <div className="user-avatar-circle" style={{ width: 34, height: 34, fontSize: "0.85rem" }}>
                                   {(p.player_name[0] || "U").toUpperCase()}
                                 </div>
                                 <div className="flex-grow-1 overflow-hidden">
@@ -886,15 +945,15 @@ export default function Quiz() {
                         )}
                       </div>
 
-                      <div className="d-flex gap-2 justify-content-center flex-wrap">
+                      <div className="d-flex gap-3 justify-content-center align-items-center flex-wrap">
                         {currentRoom.isHost ? (
                           <button
-                            className="btn btn-warning px-5 py-3 rounded-pill fw-bold text-dark shadow-lg"
-                            style={{ fontSize: "1.1rem" }}
+                            className="quiz-cta-btn"
                             onClick={handleStartBattle}
                             disabled={(currentRoom.players?.length || 1) < 2}
                           >
-                            ⚔️ BẮT ĐẦU TRANH TÀI NGAY
+                            <span>⚔️</span>
+                            <span>BẮT ĐẦU TRANH TÀI NGAY</span>
                           </button>
                         ) : (
                           <div className="text-white-50 small p-3 rounded-pill border border-white border-opacity-15">
@@ -902,7 +961,7 @@ export default function Quiz() {
                           </div>
                         )}
 
-                        <button className="btn btn-outline-light px-4 py-2.5 rounded-pill text-white" onClick={() => setRoomState("menu")}>
+                        <button className="btn btn-outline-light px-4 py-3 rounded-pill text-white fw-bold" onClick={() => setRoomState("menu")}>
                           Rời Phòng
                         </button>
                       </div>
