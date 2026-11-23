@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const toeicRoutes = require("./routes/toeicRoutes");
 const vocabularyRoutes = require("./routes/vocabularyRoutes");
 const grammarRoutes = require("./routes/grammarRoutes");
+const quizRoutes = require("./routes/quizRoutes");
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/toeic", toeicRoutes);
 app.use("/api/vocabulary", vocabularyRoutes);
 app.use("/api/grammar", grammarRoutes);
+app.use("/api/quiz", quizRoutes);
 
 // Xử lý 404 route không tồn tại
 app.use((req, res) => {

@@ -55,4 +55,10 @@ export const grammarApi = {
   create: (data) => api.post("/grammar", data),
 };
 
+export const quizApi = {
+  getQuestions: (params = {}) => api.get("/quiz/questions", { params }),
+  submitScore: (data) => api.post("/quiz/submit", data),
+  getLeaderboard: (params = {}) => api.get("/quiz/leaderboard", { params }),
+};
+
 export default api;

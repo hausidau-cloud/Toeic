@@ -80,6 +80,16 @@ export default function Navbar() {
             >
               📚 Khóa Học
             </Link>
+            <Link
+              className={`nav-link position-relative ${isActive("/quiz") ? "active-pill" : ""}`}
+              to="/quiz"
+              onClick={() => setIsOpen(false)}
+            >
+              <span>🎮 Đấu Trường</span>
+              <span className="badge bg-warning text-dark fw-bold rounded-pill ms-1.5" style={{ fontSize: "0.62rem", padding: "2px 6px" }}>
+                HOT
+              </span>
+            </Link>
           </div>
 
           {/* DESKTOP USER SECTION (Màn hình máy tính >= 992px) */}

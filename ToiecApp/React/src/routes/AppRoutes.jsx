@@ -10,6 +10,7 @@ import Practice from "../pages/Practice";
 import TestDetail from "../pages/TestDetail";
 import Vocabulary from "../pages/Vocabulary";
 import Grammar from "../pages/Grammar";
+import Quiz from "../pages/Quiz";
 import Admin from "../pages/Admin";
 
 export default function AppRoutes() {
@@ -27,6 +28,7 @@ export default function AppRoutes() {
         <Route path="/practice/:id" element={<TestDetail />} />
         <Route path="/vocabulary" element={<Vocabulary />} />
         <Route path="/grammar" element={<Grammar />} />
+        <Route path="/quiz" element={<Quiz />} />
 
         <Route path="/admin" element={<Admin />} />
       </Routes>

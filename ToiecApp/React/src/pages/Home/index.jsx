@@ -88,9 +88,19 @@ export default function Home() {
       link: "/practice",
       badge: "⏳ Sắp ra mắt"
     },
+    {
+      title: "Đấu Trường Quizizz TOEIC",
+      lessons: "Thử thách tốc độ",
+      level: "Bảng Vàng Xếp Hạng",
+      icon: "🎮",
+      desc: "Mini-game trắc nghiệm tốc độ cao kết hợp từ vựng & ngữ pháp Part 5, đếm ngược 15s và bảng vinh danh cao thủ.",
+      link: "/quiz",
+      badge: "🔥 HOT Mini-Game"
+    },
   ];
 
   const features = [
+    { title: "Đấu Trường Quizizz & Bảng Xếp Hạng", icon: "🎮", link: "/quiz", desc: "Trắc nghiệm phản xạ tốc độ cao kết hợp từ vựng & ngữ pháp, chuỗi thưởng điểm và bảng vàng vinh danh." },
     { title: "Ngữ pháp 10 chủ điểm Part 5", icon: "📖", link: "/grammar", desc: "Tổng hợp công thức, mẹo bẫy đề và bài tập trắc nghiệm giải chi tiết cho 10 chủ điểm Part 5." },
     { title: "Flashcard 600 từ vựng & Cụm từ", icon: "🧠", link: "/vocabulary", desc: "Kho từ vựng 50 bài học Barron's với phiên âm, audio và trắc nghiệm đảo chiều." },
     { title: "50 Đề Luyện Reading Part 5, 6, 7", icon: "📝", link: "/practice", desc: "Bộ 50 đề thi thực chiến bám sát bài học PDF, có phân loại theo từng Part." },
@@ -126,6 +136,10 @@ export default function Home() {
                 </p>
 
                 <div className="d-flex gap-2 flex-wrap">
+                  <Link to="/quiz" className="btn btn-danger px-3.5 py-2.5 fw-bold shadow-sm d-flex align-items-center gap-1.5 rounded-pill text-nowrap">
+                    <span>🎮</span> Đấu Trường Quiz
+                  </Link>
+
                   <Link to="/vocabulary" className="btn btn-warning px-3.5 py-2.5 fw-bold shadow-sm d-flex align-items-center gap-1.5 rounded-pill text-nowrap">
                     <span>🧠</span> Ôn Từ Vựng
                   </Link>
